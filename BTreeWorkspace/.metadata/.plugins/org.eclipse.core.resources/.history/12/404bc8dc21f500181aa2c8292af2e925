@@ -1,0 +1,69 @@
+/**
+ * 
+ * 
+ *
+ * @param <T>
+ */
+public class BTreeNode<T> {
+
+	private int maxDegree;	//max elements in node
+	private int minDegree;	//min elements in node
+	private BTreeNode<T> parentNode = null;
+	private int parentIndex = 0;
+	private boolean isRoot;
+	
+	// size should probably be max+1 to allow merging then promoting.
+	private T [] values = null;		// size set at runtime based on degree, can have null elements.
+	private BTreeNode<T>[] subTrees = null; //slots for subtrees of size = values.length + 1
+	private int numValues = 0;		// current number of values in this node
+	private boolean isLeaf;        	// stores if this is a leaf or not
+	
+	
+	/**
+	 * 
+	 * @param maxDeg
+	 * @param minDeg
+	 */
+	public BTreeNode(int maxDeg, int minDeg)
+	{
+		//TODO
+	}
+	
+	/**
+	 * 
+	 * @return if it is a leaf	
+	 */
+	public boolean leaf()           
+	{
+		return isLeaf;
+	}
+
+	
+	
+	
+					 // element 0 is left of values[0]
+					 // element subTrees[size] is right of values[size-1]
+	public bool getIsRoot()
+	public void setIsRoot(bool root)
+	public T maxKey()
+	public T minKey()
+	public BTreeNode<T> getParentNode()
+public int getParentIndex()
+	public BTreeNode<T> setParentNode(BTreeNode<T> pnt)
+public int setParentIndex(int pnti)
+
+public void putObjectAtIndex(T obj)
+public int getSize()
+public T getObjectAtIndex(int i)
+public void removeObjectAtIndex(int i)
+
+	
+	
+	
+	
+
+	public boolean contains(T key)
+	{
+		return false;
+	}
+}

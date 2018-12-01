@@ -1,0 +1,102 @@
+/**
+ * 
+ * 
+ *
+ * @param <T>
+ */
+public class BTree<T> {
+	private BTreeNode<T> root = null;
+	
+	public void create()
+	{
+		//TODO
+	}
+	
+	/**
+	 * recursive search - calls BTreeSearch
+	 * @param root
+	 * @param key
+	 * @return
+	 */
+	public BTreeNode<T> search(BTreeNode root,T key)
+	{
+		
+	}
+	
+	/**
+	 * calls InsertSearch, then runs the insert algo on slides
+	 * @param root
+	 * @param key
+	 */
+	public void insert(BTreeNode<T> root, T key)
+	{
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public void delete()
+	{
+		//TODO
+	}
+
+	/**
+	 * actual recursive algo - see slide 23
+	 */
+	//private BTreeNode<T> BTreeSearch(x,k)//look up param types when implementing, didn't list them in the document.
+	//{
+		
+	//}
+	
+	/**
+	 * equivalent to Disk-Read in the slides. // Dan
+	 * @param offset
+	 * @return
+	 */
+	private long readAtOffset(int offset)
+	{
+		return 0;//TODO
+	}
+	
+	/**
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private BTreeNode<T> findPredecessor(BTreeNode<T> node)
+	{
+		return null; //TODO
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private BTreeNode<T> findSuccessor(BTreeNode<T> node)
+	{
+		return null;//TODO
+	}
+	
+	/**
+	 * 
+	 * @param node
+	 */
+	private void promoteNode(BTreeNode<T> node)
+	{
+		//TODO
+	}
+	
+	private void mergeTwoNodes(BTreeNode<T> parent, BTreeNode<T> child1, BTreeNode<T> child2)
+	private void mergeTwoNodes(BTreeNode<T> node1, BTreeNode<T> node2)
+	private diskRead(int offset) // this might interface with a method in GeneBankSearch for actual disk access or might totally be relocated there.
+	private BTreeNode<T> InsertSearch(BTreeNode<T> root, T key)
+	private void InsertNonFull(BTreeNode<T> target, T key)
+	private void SplitChild(BTreeNode<T> x, int i, BTreeNode<T> y) // see slides page 46
+	private void RemoveKey(BTreeNode<T> x, T k)
+	private void RemoveChild(BTreeNode<T> x, BTreeNode<T> d)
+	private void MoveKey(T tempKey, BTreeNode<T> y, BTreeNode<x>)
+	private void MakeRoot(BTreeNode<T> newRoot)
+	private BTreeNode<T> FindChild(BTreeNode root,T key)
+
+}

@@ -1,0 +1,19 @@
+/**
+ * 
+ * 
+ *
+ * @param <T>
+ */
+public class BTreeNode<T> {
+
+	
+	
+	
+	
+	
+
+	public boolean contains(T key)
+	{
+		return false;
+	}
+}
