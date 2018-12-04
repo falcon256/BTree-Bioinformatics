@@ -1,3 +1,5 @@
+import BTree.BTreeNode;
+
 /**
  * 
  * 
@@ -6,6 +8,12 @@
  */
 public class BTree<T> {
 	private BTreeNode<T> root = null;
+	private int minDeg;
+	private int maxDeg;
+	
+	public BTree(int degree){
+		minDeg = 
+	}
 	
 	public void create()
 	{
@@ -28,9 +36,18 @@ public class BTree<T> {
 	 * @param root
 	 * @param key
 	 */
-	public void insert(BTreeNode<T> root, T key)
-	{
-		//TODO
+	public void insert(BTreeNode<T> root, long key) {//Golam: changed the key genetic to long to match with tree object
+		if(root.getSize() == maxDeg -1 ) {
+			TreeObject obj = new TreeObject(key);
+			BTreeNode<T> s = new BTreeNode<T>();
+			s.setIsLeaf(false);
+			s.setSize(0);
+			s.addChild(root);
+			splitChild(s, 1, root);
+			InsertNonFull(s,key);
+		}else {
+			InsertNonFull(root,key);
+		}
 	}
 	
 	/**
@@ -133,7 +150,7 @@ public class BTree<T> {
 	 * @param target
 	 * @param key
 	 */
-	private void InsertNonFull(BTreeNode<T> target, T key)
+	private void InsertNonFull(BTreeNode<T> target, long key)
 	{
 		//TODO
 	}
@@ -144,10 +161,9 @@ public class BTree<T> {
 	 * @param i
 	 * @param y
 	 */
-	private void SplitChild(BTreeNode<T> x, int i, BTreeNode<T> y)
-	{
-		//TODO
-	}
+	public void splitChild(BTreeNode<T> x, int i, BTreeNode<T> y) {
+		
+    }
 	
 	/**
 	 * 

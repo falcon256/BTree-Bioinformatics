@@ -6,8 +6,8 @@
  */
 public class BTreeNode<T> {
 
-	private int maxDegree;	//max elements in node
-	private int minDegree;	//min elements in node
+	private int maxDegree;	//max elements in node // Golam : I think we don't need this here. We can match the degree in the BTree insert method. as everything else will be handle from there like should we split the tree or not we can't do this from this class
+	private int minDegree;	//min elements in node //Golam: Same as max degree
 	private BTreeNode<T> parentNode = null;
 	private int parentIndex = 0;
 	private boolean isRoot;
@@ -23,22 +23,28 @@ public class BTreeNode<T> {
 	
 	
 	/**
-	 * 
+	 *
 	 * @param maxDeg
 	 * @param minDeg
 	 */
-	public BTreeNode(int maxDeg, int minDeg)
+	//Golam: I am removing the parameter for now. we need to check the degree in BTree class.
+	public BTreeNode()
 	{
 		//TODO
+		parentIndex = -1;
 	}
 	
 	/**
 	 * 
 	 * @return if it is a leaf	
 	 */
-	public boolean leaf()           
+	public boolean getIsleaf()           
 	{
-		return isLeaf;
+		return this.isLeaf;
+	}
+	
+	public void setIsLeaf(boolean isLeaf) {
+		this.isLeaf = isLeaf;
 	}
 	
 	/**
@@ -126,7 +132,9 @@ public class BTreeNode<T> {
 	{
 		return this.numValues;
 	}
-	
+	public void setSize(int size) {
+		this.numValues = size;
+	}
 	/**
 	 * 
 	 * @return object at index i in values[]
@@ -135,7 +143,10 @@ public class BTreeNode<T> {
 	{
 		return null;//TODO
 	}
-	
+	//Golam: we need a method here to add child
+	public void addChild(BTreeNode<T> child) {
+		
+	}
 	/**
 	 * 
 	 * @return returns the object we remove at index I. It is typical convention to always return an object you remove.

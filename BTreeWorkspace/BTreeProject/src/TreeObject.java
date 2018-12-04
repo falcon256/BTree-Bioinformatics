@@ -11,6 +11,9 @@ public class TreeObject {
 	/**
 	 * 
 	 */
+	public TreeObject(long key) {
+		
+	}
 	public void setData(long d)
 	{
 		data = d;
