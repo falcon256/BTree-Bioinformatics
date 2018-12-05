@@ -1,4 +1,4 @@
-import BTree.BTreeNode;
+//import BTree.BTreeNode;//Dan - this is implied if they are both in the default package, otherwise lets move everything into a btree package.
 
 /**
  * 
@@ -12,12 +12,12 @@ public class BTree<T> {
 	private int maxDeg;
 	
 	public BTree(int degree){
-		minDeg = 
+		//minDeg = 
 	}
 	
 	public void create()
 	{
-		//TODO
+		root = new BTreeNode<T>();
 	}
 	
 	/**
@@ -26,7 +26,7 @@ public class BTree<T> {
 	 * @param key
 	 * @return
 	 */
-	public BTreeNode<T> search(BTreeNode root,T key)
+	public BTreeNode<T> search(BTreeNode<T> root,T key)
 	{
 		return null;//TODO
 	}
@@ -38,7 +38,7 @@ public class BTree<T> {
 	 */
 	public void insert(BTreeNode<T> root, long key) {//Golam: changed the key genetic to long to match with tree object
 		if(root.getSize() == maxDeg -1 ) {
-			TreeObject obj = new TreeObject(key);
+			TreeObject obj = new TreeObject(key);//note - A BTreeNode stores one or more TreeObjects, a BTreeNode may have one or more child BTreeNodes.
 			BTreeNode<T> s = new BTreeNode<T>();
 			s.setIsLeaf(false);
 			s.setSize(0);
@@ -210,7 +210,7 @@ public class BTree<T> {
 	 * @param key
 	 * @return
 	 */
-	private BTreeNode<T> FindChild(BTreeNode root,T key)
+	private BTreeNode<T> FindChild(BTreeNode<T> root,T key)
 	{
 		return null;//TODO
 	}

@@ -6,15 +6,15 @@
  */
 public class BTreeNode<T> {
 
-	private int maxDegree;	//max elements in node // Golam : I think we don't need this here. We can match the degree in the BTree insert method. as everything else will be handle from there like should we split the tree or not we can't do this from this class
-	private int minDegree;	//min elements in node //Golam: Same as max degree
+	//private int maxDegree;	//max elements in node // Golam : I think we don't need this here. We can match the degree in the BTree insert method. as everything else will be handle from there like should we split the tree or not we can't do this from this class
+	//private int minDegree;	//min elements in node //Golam: Same as max degree
 	private BTreeNode<T> parentNode = null;
 	private int parentIndex = 0;
 	private boolean isRoot;
 	
 	// size should probably be max+1 to allow merging then promoting.
+	private T [] keys = null;		// this is actually needed since the hashCode method only returns a 32 bit int, not a 64.
 	private T [] values = null;		// size set at runtime based on degree, can have null elements.
-	
 	// element 0 is left of values[0]
 	// element subTrees[size] is right of values[size-1]
 	private BTreeNode<T>[] subTrees = null; //slots for subtrees of size = values.length + 1
@@ -24,8 +24,6 @@ public class BTreeNode<T> {
 	
 	/**
 	 *
-	 * @param maxDeg
-	 * @param minDeg
 	 */
 	//Golam: I am removing the parameter for now. we need to check the degree in BTree class.
 	public BTreeNode()
