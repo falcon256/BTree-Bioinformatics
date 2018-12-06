@@ -14,10 +14,12 @@ public class BTreeNode<T> {
 	
 	// size should probably be max+1 to allow merging then promoting.
 	private T [] keys = null;		// this is actually needed since the hashCode method only returns a 32 bit int, not a 64.
+	//Golam: Do we need values here?
 	private T [] values = null;		// size set at runtime based on degree, can have null elements.
 	// element 0 is left of values[0]
 	// element subTrees[size] is right of values[size-1]
 	private BTreeNode<T>[] subTrees = null; //slots for subtrees of size = values.length + 1
+	private BTreeNode<T>[] children = null;
 	private int numValues = 0;		// current number of values in this node
 	private boolean isLeaf;        	// stores if this is a leaf or not
 	
@@ -143,13 +145,34 @@ public class BTreeNode<T> {
 	}
 	//Golam: we need a method here to add child
 	public void addChild(BTreeNode<T> child) {
+		children[children.length] = child;
+	}
+	public void addChild(BTreeNode<T> child,int index) {
+		children[index] = child; 
+	}
+	public BTreeNode<T> getChild(int index){
+		return children[index];
+	}
+	//Golam: we need a method here to remove child
+	public BTreeNode<T> removeChild() {
 		
+		return null;
+	}
+	//Golam: we need a method to add new key in the node or we can also say it as addTreeObject
+	public void addKey(T key) {
+		keys[keys.length] = key;
+	}
+	public void addKey(T key,int index) {
+		keys[index] = key;
+	}
+	public T getKey(int index) {
+		return keys[index];
 	}
 	/**
 	 * 
 	 * @return returns the object we remove at index I. It is typical convention to always return an object you remove.
 	 */
-	public T removeObjectAtIndex(int i)
+	public T removeKey(int i)
 	{
 		return null;//TODO
 	}

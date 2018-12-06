@@ -36,13 +36,19 @@ public class BTree<T> {
 	 * @param root
 	 * @param key
 	 */
-	public void insert(BTreeNode<T> root, long key) {//Golam: changed the key genetic to long to match with tree object
+	public void insert(BTreeNode<TreeObject> root, long key) {//Golam: changed the key genetic to long to match with tree object
 		if(root.getSize() == maxDeg -1 ) {
-			TreeObject obj = new TreeObject(key);//note - A BTreeNode stores one or more TreeObjects, a BTreeNode may have one or more child BTreeNodes.
-			BTreeNode<T> s = new BTreeNode<T>();
+			//Created this object into the insertnonfull method to match with slide algorithm
+			//TreeObject obj = new TreeObject(key);//note - A BTreeNode stores one or more TreeObjects, a BTreeNode may have one or more child BTreeNodes.
+			//Allocate  memory for new root
+			BTreeNode<TreeObject> s = new BTreeNode<>();
+			//New root isn't a leaf
 			s.setIsLeaf(false);
+			//Set the new root size zero for now
 			s.setSize(0);
+			//Set the previous root as the children of the new root
 			s.addChild(root);
+			//Split the old root and move one key to the new root
 			splitChild(s, 1, root);
 			InsertNonFull(s,key);
 		}else {
@@ -147,12 +153,43 @@ public class BTree<T> {
 
 	/**
 	 * 
-	 * @param target
+	 * @param x
 	 * @param key
 	 */
-	private void InsertNonFull(BTreeNode<T> target, long key)
-	{
-		//TODO
+	private void InsertNonFull(BTreeNode<TreeObject> x, long key){
+		// Initialize index as index of rightmost element 
+		int i = x.getSize()-1;
+		// If this is a leaf node 
+		if(x.getIsleaf()) {
+			// The following loop does two things 
+	        // a) Finds the location of new key to be inserted 
+	        // b) Moves all greater keys to one place ahead 
+			while(i >= 0 && x.getKey(i).getData() > key) {
+				x.addKey(x.getKey(i),i+1);
+				i--;
+			}
+			// Insert the new key at found location 
+			TreeObject nTreeObject = new TreeObject(key);
+			x.addKey(nTreeObject,i+1);
+			x.setSize(x.getSize());
+		}else {// If this node is not leaf 
+			 // Find the child which is going to have the new key 
+			while(i>=0 && x.getKey(i).getData() > key) {
+				i--;
+			}
+			 // See if the found child is full 
+			if(x.getChild(i+1).getSize() == maxDeg -1) {
+				// If the child is full, then split it 
+				splitChild(x,i+1,x.getChild(i+1));
+				// After split, the middle key of C[i] goes up and 
+	            // C[i] is splitted into two.  See which of the two 
+	            // is going to have the new key 
+				if(x.getKey(i+1).getData() < key) {
+					i++;
+				}
+			}
+			InsertNonFull(x.getChild(i),key);
+		}
 	}
 	
 	/**
@@ -161,8 +198,36 @@ public class BTree<T> {
 	 * @param i
 	 * @param y
 	 */
-	public void splitChild(BTreeNode<T> x, int i, BTreeNode<T> y) {
-		
+	public void splitChild(BTreeNode<TreeObject> x, int i, BTreeNode<TreeObject> y) {
+		BTreeNode<TreeObject> z = new BTreeNode<>();
+		z.setIsLeaf(y.getIsleaf());
+		z.setSize(minDeg-1);
+		 // Copy the last (t-1) keys of y to z
+		for(int j = 0; j < minDeg-1; j++) {
+			z.addKey(y.getKey(j+minDeg));
+		}
+		// Copy the last t children of y to z 
+		if(!y.getIsleaf()) {
+			for(int j = 0; j<minDeg;j++) {
+				z.addChild(y.getChild(j+minDeg));
+			}
+		}
+		// Reduce the number of keys in y 
+		y.setSize(minDeg-1);
+		 // Since this node is going to have a new child, 
+	    // create space of new child 
+		for(int j = x.getSize(); j>=i+1;j--) {
+			x.addChild(x.getChild(j),j+1);
+		}
+		// Link the new child to this node 
+		x.addChild(z,i+1);
+		// A key of y will move to this node. Find location of 
+	    // new key and move all greater keys one space ahead
+		for(int j = x.getSize()-1;j>=i;j--) {
+			x.addKey(x.getKey(j), j+1);
+		}
+		x.addKey(y.getKey(minDeg-1), i);
+		x.setSize(x.getSize()+1);
     }
 	
 	/**
