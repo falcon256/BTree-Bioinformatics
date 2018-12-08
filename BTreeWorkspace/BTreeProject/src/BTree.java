@@ -15,20 +15,35 @@ public class BTree<T> {
 		//minDeg = 
 	}
 	
-	public void create()
-	{
-		root = new BTreeNode<T>();
+	public void create(){
+		BTreeNode<T> x = new BTreeNode<T>();
+		x.setIsLeaf(true);
+		x.setSize(0);
+		//DiskWrite(x);
+		root = x;
+		
 	}
 	
 	/**
 	 * recursive search - calls BTreeSearch
 	 * @param root
 	 * @param key
-	 * @return
+	 * @return //Golam it will return the index of the found key. if not found it will return the -1
 	 */
-	public BTreeNode<T> search(BTreeNode<T> root,T key)
-	{
-		return null;//TODO
+	public int search(BTreeNode<TreeObject> x,long key){
+		int i = 0;
+		// Find the first key greater than or equal to key 
+		while( i<x.getSize() && key > x.getKey(i).getData() ) {
+			i++;
+		}
+		// If the found key is equal to k, return this node 
+		if(i <= x.getSize() && key == x.getKey(i).getData()) {
+			return i;
+		}
+		if(x.getIsleaf()) {
+			return -1;
+		}
+		return search(x.getChild(i),key);
 	}
 	
 	/**
@@ -59,9 +74,60 @@ public class BTree<T> {
 	/**
 	 * 
 	 */
-	public void delete()
-	{
+	public void delete(BTreeNode<T> x,T key) {
 		//TODO
+		if(x.contains(key)) {
+			RemoveKey(x,key);
+			if(!x.getIsleaf()) {//Initial node
+				BTreeNode<T> y = findPredecessor(x);
+				BTreeNode<T> z = findSuccessor(x);
+				if(y.getSize() > minDeg - 1) {
+					T tempKey = y.maxKey();
+					MoveKey(tempKey,y,x);
+				}else if( z.getSize() > minDeg-1) {
+					T tempKey = x.maxKey();
+					MoveKey(tempKey,z,x);
+				}else {
+					mergeTwoNodes(y,z);
+					RemoveChild(x,z);
+					if(x.getIsRoot() && x.getSize() == 0) {
+						MakeRoot(y);
+					}
+				}
+			}
+		}else {//key not found
+			BTreeNode<T> c = FindChild(x,key);
+			if(c.getSize() == minDeg-1) {
+				BTreeNode<T> b = getLeftSibling(c);
+				BTreeNode<T> d = getRightSibling(c);
+				if(b.getSize() > minDeg - 1 ) {
+					T parentKey = getChildKey(x,b,c);
+					MoveKey(parentKey,x,c);
+					T tempKey = b.maxKey();
+					MoveKey(tempKey,b,x);
+				}else if(d.getSize() > minDeg - 1) {
+					T parentKey = getChildKey(x,c,d);
+					MoveKey(parentKey,x,c);
+					T tempKey = d.minKey();
+					MoveKey(tempKey,d,x);
+					
+				}else {
+					mergeTwoNodes(c,d);
+					RemoveChild(x,d);
+					if(x.getIsRoot() && x.getSize() == 0) {
+						MakeRoot(c);
+					}
+				}
+			}
+			delete(c,key);
+		}
+	}
+	
+	private BTreeNode<T> getLeftSibling(BTreeNode<T> x) {
+		return null;
+	}
+	private BTreeNode<T> getRightSibling(BTreeNode<T> x) {
+		return null;
 	}
 
 	/**
@@ -87,26 +153,35 @@ public class BTree<T> {
 	 * @param node
 	 * @return
 	 */
-	private BTreeNode<T> findPredecessor(BTreeNode<T> node)
-	{
-		return null; //TODO
+	// A function to get predecessor of node
+	
+	private BTreeNode<T> findPredecessor(BTreeNode<T> node){
+		 // Keep moving to the right most node until we reach a leaf 
+		while(!node.getIsleaf()) {
+			node = node.getChild(node.getSize());
+		}
+		// Return the last key of the leaf 
+		return node;
 	}
 	
 	/**
 	 * 
 	 * @return
 	 */
-	private BTreeNode<T> findSuccessor(BTreeNode<T> node)
-	{
-		return null;//TODO
+	private BTreeNode<T> findSuccessor(BTreeNode<T> node){
+		 // Keep moving the left most node starting from node until we reach a leaf
+		while(!node.getIsleaf()) {
+			node = node.getChild(0);
+		}
+		// Return the first key of the leaf 
+		return node;
 	}
 	
 	/**
 	 * 
 	 * @param node
 	 */
-	private void promoteNode(BTreeNode<T> node)
-	{
+	private void promoteNode(BTreeNode<T> node){
 		//TODO
 	}
 	
@@ -171,7 +246,7 @@ public class BTree<T> {
 			// Insert the new key at found location 
 			TreeObject nTreeObject = new TreeObject(key);
 			x.addKey(nTreeObject,i+1);
-			x.setSize(x.getSize());
+			x.setSize(x.getSize()+1);
 		}else {// If this node is not leaf 
 			 // Find the child which is going to have the new key 
 			while(i>=0 && x.getKey(i).getData() > key) {
@@ -181,9 +256,7 @@ public class BTree<T> {
 			if(x.getChild(i+1).getSize() == maxDeg -1) {
 				// If the child is full, then split it 
 				splitChild(x,i+1,x.getChild(i+1));
-				// After split, the middle key of C[i] goes up and 
-	            // C[i] is splitted into two.  See which of the two 
-	            // is going to have the new key 
+				// After split, the middle key of x.child(i) goes up and splitted into two.  See which of the two is going to have the new key 
 				if(x.getKey(i+1).getData() < key) {
 					i++;
 				}

@@ -180,8 +180,23 @@ public class BTreeNode<T> {
 	 * 
 	 * @return if values[] contains object with key
 	 */
-	public boolean contains(T key)
-	{
+	public boolean contains(T key){
 		return false;//TODO
 	}
+	
+	@Override
+    public String toString(){
+        String s = new String();
+        s += "keys: ";
+        for (int i = 0; i < keys.length; i++)
+        {
+            s += (keys[i] + " ");
+        }
+        s += "\nchildren: ";
+        for (int i = 0; i < children.length; i++)
+        {
+            s += (children[i] + " ");
+        }
+        return s;
+    }
 }
