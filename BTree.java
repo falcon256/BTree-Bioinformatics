@@ -328,7 +328,7 @@ public class BTree<T> {
 	
 	public void splitNode(BTreeNode<T> node)
 	{
-		
+		int oldTreeCount = countSubtrees(this.root,0);
 		if(node.getIsRoot())
 		{
 			if(verbose)
@@ -391,9 +391,22 @@ public class BTree<T> {
 				System.err.println("Node size/element mismatch");
 			if(checkNodeSizing(newNode))
 				System.err.println("Node size/element mismatch");
+			
+			//debug code
+			int newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split failing at root.");
+			
 			shiftElementsLeft(newRoot);
 			shiftElementsLeft(node);
 			shiftElementsLeft(newNode);
+			
+			//debug code
+			newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split failing at root after shiftelementsleft.");
 			return;
 		}
 		BTreeNode<T> newNode = new BTreeNode<T>(maxDegree);
@@ -455,9 +468,23 @@ public class BTree<T> {
 				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
 				node.setSubTreeAtIndex(null, i);
 			}
+			
+			//debug code
+			int newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split failing non-root with no shift.");
+			
+			
 			shiftElementsLeft(node);
 			shiftElementsLeft(newNode);	
 			shiftElementsLeft(parent);
+			
+			//debug code
+			newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split failing non-root with no shift after shiftelelemtsleft.");
 			checkForSplit(parent);
 		}
 		else
@@ -511,9 +538,22 @@ public class BTree<T> {
 				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
 				node.setSubTreeAtIndex(null, i);
 			}
+			
+			//debug code
+			int newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split failing at non-root with shift.");
 			shiftElementsLeft(node);
 			shiftElementsLeft(newNode);	
 			shiftElementsLeft(parent);
+			
+			//debug code
+			newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split failing non-root with shift after shiftelelemtsleft.");
+			
 			if(verbose)
 				System.out.println("Moved elements to new node.");
 			if(verbose)
