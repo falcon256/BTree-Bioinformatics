@@ -155,9 +155,6 @@ public class BTree<T> {
 		{
 			offset++;
 		}
-		if(offset>=maxDegree)
-			if(verbose)
-				System.out.println("Something went wrong in InsertSearch, maxDegree was passed.");
 		if(start.getSubTreeAtIndex(offset)!=null)
 			return InsertSearch(start.getSubTreeAtIndex(offset), key);
 		return start;
@@ -277,9 +274,9 @@ public class BTree<T> {
 			node.setSize(node.getSize()-1);
 			
 			if(verbose)
-				System.out.print(parent);
+				System.out.println(parent);
 			if(verbose)
-				System.out.print(node);
+				System.out.println(node);
 			
 			
 			for(int i = minDegree+1; i < maxDegree; i++)
@@ -300,25 +297,16 @@ public class BTree<T> {
 				node.setSubTreeAtIndex(null, i);
 			}
 			if(verbose)
-				System.out.print("Moved elements to new node.");
+				System.out.println("Moved elements to new node.");
 			if(verbose)
-				System.out.print(node);
-			if(verbose)
-				System.out.print(newNode);
-			
-			
-			/*
-			if(verbose)
-			{
-				System.out.println(spot);
 				System.out.println(node);
+			if(verbose)
 				System.out.println(newNode);
-			}
 			
-			*/
-			//checkForSplit(spot);
 			
-			//System.out.println("Debug: Split skipped.");
+			
+			checkForSplit(parent);
+			
 		}
 		
 		
