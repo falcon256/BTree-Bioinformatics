@@ -52,7 +52,7 @@ public class GeneBankCreateBTree {
 		degree = Integer.parseInt(args[1]);
 		try {
 			filePath=args[2];
-			file = new File(filePath, "rw");
+			file = new File(filePath);
 			fileStream = new FileInputStream(file);
 			fileReader = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
@@ -107,10 +107,13 @@ public class GeneBankCreateBTree {
 			
 			//bring in the data.
 			String inLine = fileReader.readLine();
-			
-			while(inLine!=null||!inLine.contains("ORIGIN"))
+			while(inLine!=null)
+			{
+				
+			while(inLine!=null&&!inLine.contains("ORIGIN"))
 				inLine = fileReader.readLine();
 			
+			inLine = fileReader.readLine();//skip the ORIGIN line before processing.
 			String inData = "";
 			String batch = "";
 			int offset = 0;
@@ -120,9 +123,10 @@ public class GeneBankCreateBTree {
 				if(offset>=inLine.length())
 				{
 					inLine = fileReader.readLine();
+					offset=0;
 				}				
 				
-				char c = inData.charAt(offset);
+				char c = inLine.charAt(offset);
 				
 				if(c=='/'||c=='n'||c=='N')
 					break;
@@ -140,7 +144,7 @@ public class GeneBankCreateBTree {
 				}
 				offset++;
 			}
-			
+			}
 			
 			
 			
@@ -148,7 +152,7 @@ public class GeneBankCreateBTree {
 			//for each ... file.write(treeObject.getBytes());
 
 			//and we are done.
-			file.close();
+			//file.close();
 			
 			
 			

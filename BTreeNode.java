@@ -1,3 +1,5 @@
+import java.lang.reflect.Array;
+
 /**
  * 
  * 
@@ -11,11 +13,12 @@ public class BTreeNode<T> {
 	private boolean isRoot;
 	
 	// size should probably be max+1 to allow merging then promoting.
-	private long[] keys = null;		// this is actually needed since the hashCode method only returns a 32 bit int, not a 64.
-	private T[] values = null;		// size set at runtime based on degree, can have null elements.
+	private long[] keys = null;
+	private T[] values = null;
+	private BTreeNode<T>[] subTrees = null;
 	// element 0 is left of values[0]
 	// element subTrees[size] is right of values[size-1]
-	private BTreeNode<T>[] subTrees = null; //slots for subtrees of size = values.length + 1
+	
 	private int numValues = 0;		// current number of values in this node
 	private boolean isLeaf;        	// stores if this is a leaf or not
 	
@@ -23,9 +26,20 @@ public class BTreeNode<T> {
 	/**
 	 *
 	 */
+	@SuppressWarnings("unchecked")
 	public BTreeNode(int degree)
 	{
 		parentIndex = -1;
+		keys = new long[degree];
+		values = (T[]) new Object[degree];
+		try {
+			subTrees = (BTreeNode<T>[]) Array.newInstance(Class.forName("BTreeNode"),degree+1);
+		} catch (NegativeArraySizeException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
 		
 	}
 	
@@ -40,6 +54,37 @@ public class BTreeNode<T> {
 	
 	public void setIsLeaf(boolean isLeaf) {
 		this.isLeaf = isLeaf;
+	}
+	
+	public long getKeyAtIndex(int i)
+	{
+		return keys[i];
+	}
+	
+	public T getValueAtIndex(int i)
+	{
+		return values[i];
+	}
+	
+	public BTreeNode<T> getSubTreeAtIndex(int i)
+	{
+		return subTrees[i];
+	}
+	
+	public void setKeyAtIndex(long l, int i)
+	{
+		keys[i] = l;
+	}
+	
+	public void setValueAtIndex(T t, int i)
+	{
+		values[i] = t;
+	}
+
+	
+	public void setSubTreeAtIndex(BTreeNode<T> n,int i)
+	{
+		subTrees[i] = n;
 	}
 	
 	/**
@@ -139,35 +184,13 @@ public class BTreeNode<T> {
 		return null;//TODO
 	}
 	
-	//Golam: we need a method here to add child
-	public void addChild(BTreeNode<T> child) {
-		children[children.length] = child;
-	}
-	
-	public void addChild(BTreeNode<T> child,int index) {
-		children[index] = child; 
-	}
-	
-	public BTreeNode<T> getChild(int index){
-		return children[index];
-	}
-	
 	//Golam: we need a method here to remove child
 	public BTreeNode<T> removeChild() {
 		
 		return null;
 	}
 	
-	//Golam: we need a method to add new key in the node or we can also say it as addTreeObject
-	public void addKey(T key) {
-		keys[keys.length] = key;
-	}
-	public void addKey(T key,int index) {
-		keys[index] = key;
-	}
-	public T getKey(int index) {
-		return keys[index];
-	}
+	
 	/**
 	 * 
 	 * @return returns the object we remove at index I. It is typical convention to always return an object you remove.
@@ -193,9 +216,9 @@ public class BTreeNode<T> {
             s += (keys[i] + " ");
         }
         s += "\nchildren: ";
-        for (int i = 0; i < children.length; i++)
+        for (int i = 0; i < values.length; i++)
         {
-            s += (children[i] + " ");
+            s += (values[i].toString() + " ");
         }
         return s;
     }

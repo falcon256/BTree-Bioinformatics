@@ -8,22 +8,23 @@
  */
 public class BTree<T> {
 	private BTreeNode<T> root = null;
-	private int minDeg;
-	private int maxDeg;
+	private int minDegree;
+	private int maxDegree;
 	private boolean verbose = false;
 	
 	public BTree(int degree){
+		maxDegree = degree;
 		create();
 	}
 	
 	public BTree(int degree,boolean verb){
+		this(degree);
 		verbose = verb;
-		create();
 	}
 	
 	public void create(){
 		if(verbose)System.out.println("Create called.");
-		BTreeNode<T> x = new BTreeNode<T>();
+		BTreeNode<T> x = new BTreeNode<T>(maxDegree);
 		x.setIsLeaf(true);
 		x.setSize(0);
 		//DiskWrite(x);
@@ -37,6 +38,7 @@ public class BTree<T> {
 	 * @param key
 	 * @return //Golam it will return the index of the found key. if not found it will return the -1
 	 */
+	/*
 	public int search(BTreeNode<TreeObject> x,long key){
 		int i = 0;
 		// Find the first key greater than or equal to key 
@@ -51,33 +53,108 @@ public class BTree<T> {
 			return -1;
 		}
 		return search(x.getChild(i),key);
-	}
+	}*/
 	
 	/**
 	 * calls InsertSearch, then runs the insert algo on slides
 	 * @param root
 	 * @param key
 	 */
-	public void insert(BTreeNode<TreeObject> root, long key) {//Golam: changed the key genetic to long to match with tree object
-		if(root.getSize() == maxDeg -1 ) {
-			//Created this object into the insertnonfull method to match with slide algorithm
-			//TreeObject obj = new TreeObject(key);//note - A BTreeNode stores one or more TreeObjects, a BTreeNode may have one or more child BTreeNodes.
-			//Allocate  memory for new root
-			BTreeNode<TreeObject> s = new BTreeNode<>();
-			//New root isn't a leaf
-			s.setIsLeaf(false);
-			//Set the new root size zero for now
-			s.setSize(0);
-			//Set the previous root as the children of the new root
-			s.addChild(root);
-			//Split the old root and move one key to the new root
-			splitChild(s, 1, root);
-			InsertNonFull(s,key);
-		}else {
-			InsertNonFull(root,key);
+	public void insert(T obj, long key) {
+		BTreeNode<T> spot = InsertSearch(root,key);
+		//figure out if we need to shift.
+		int offset = 0;
+		while(offset<maxDegree&&root.getValueAtIndex(offset)!=null&&root.getKeyAtIndex(offset)<key)
+		{
+			offset++;
 		}
+		if(root.getValueAtIndex(offset)==null)//it is empty, no need to shift.
+		{
+			if(verbose)
+				System.out.println("Inserting " + key + "without shift.");
+			spot.setKeyAtIndex(key, offset);
+			spot.setValueAtIndex(obj, offset);
+			return;
+		}
+		
+		if(verbose)//debug output
+		{
+			for(int i = 0; i <maxDegree; i++)
+				System.out.print(spot.getKeyAtIndex(i)+ " ");
+			for(int i = 0; i <=maxDegree; i++)
+				System.out.print(spot.getSubTreeAtIndex(i));
+		}
+		
+
+		//going to need to shift right.
+		for(int i = maxDegree; i > offset; i--)
+		{
+			spot.setKeyAtIndex(spot.getKeyAtIndex(i-1), i);
+			spot.setValueAtIndex(spot.getValueAtIndex(i-1), i);
+			spot.setSubTreeAtIndex(spot.getSubTreeAtIndex(i), i+1);
+		}
+		
+		if(verbose)//debug output
+		{
+			for(int i = 0; i <maxDegree; i++)
+				System.out.print(spot.getKeyAtIndex(i)+ " ");
+			for(int i = 0; i <=maxDegree; i++)
+				System.out.print(spot.getSubTreeAtIndex(i));
+		}
+		
+		if(verbose)
+			System.out.println("Inserting " + key + "after shifting.");
+
+		spot.setKeyAtIndex(key, offset);
+		spot.setValueAtIndex(obj, offset);
 	}
 	
+	/**
+	 * 
+	 * @param root
+	 * @param key
+	 * @return
+	 */
+	private BTreeNode<T> InsertSearch(BTreeNode<T> root, long key)
+	{
+		if(root.getIsleaf())
+		{
+			int offset = 0;
+			while(offset<maxDegree&&root.getValueAtIndex(offset)!=null&&root.getKeyAtIndex(offset)<key)
+			{
+				offset++;
+			}
+			//TODO
+			if(offset>=maxDegree)
+			{
+				if(verbose)
+				{
+					System.out.println("Need to split node.");
+					for(int i = 0; i <maxDegree; i++)
+						System.out.print(root.getKeyAtIndex(i)+ " ");
+					for(int i = 0; i <=maxDegree; i++)
+						System.out.print(root.getSubTreeAtIndex(i));
+				}
+				//split(root);
+			}
+			return root;
+		}
+		//not leaf
+		int offset = 0;
+		while(offset<maxDegree&&root.getValueAtIndex(offset)!=null&&root.getKeyAtIndex(offset)<key)
+		{
+			offset++;
+		}
+		if(offset>=maxDegree)
+			if(verbose)
+				System.out.println("Something went wrong in InsertSearch, maxDegree was passed.");
+		if(root.getSubTreeAtIndex(offset)!=null)
+			return InsertSearch(root.getSubTreeAtIndex(offset), key);
+		else
+			if(verbose)
+				System.out.println("Something went wrong in InsertSearch, no leaf where this should be inserted.");
+		return null;
+	}
 	/**
 	 * 
 	 */
@@ -162,7 +239,7 @@ public class BTree<T> {
 	 * @return
 	 */
 	// A function to get predecessor of node
-	
+	/*
 	private BTreeNode<T> findPredecessor(BTreeNode<T> node){
 		 // Keep moving to the right most node until we reach a leaf 
 		while(!node.getIsleaf()) {
@@ -171,11 +248,12 @@ public class BTree<T> {
 		// Return the last key of the leaf 
 		return node;
 	}
-	
+	*/
 	/**
 	 * 
 	 * @return
 	 */
+	/*
 	private BTreeNode<T> findSuccessor(BTreeNode<T> node){
 		 // Keep moving the left most node starting from node until we reach a leaf
 		while(!node.getIsleaf()) {
@@ -184,7 +262,7 @@ public class BTree<T> {
 		// Return the first key of the leaf 
 		return node;
 	}
-	
+	*/
 	/**
 	 * 
 	 * @param node
@@ -223,22 +301,14 @@ public class BTree<T> {
 		return 0;//TODO
 	}
 	
-	/**
-	 * 
-	 * @param root
-	 * @param key
-	 * @return
-	 */
-	private BTreeNode<T> InsertSearch(BTreeNode<T> root, T key)
-	{
-		return null;//TODO
-	}
+	
 
 	/**
 	 * 
 	 * @param x
 	 * @param key
 	 */
+	/*
 	private void InsertNonFull(BTreeNode<TreeObject> x, long key){
 		// Initialize index as index of rightmost element 
 		int i = x.getSize()-1;
@@ -272,13 +342,14 @@ public class BTree<T> {
 			InsertNonFull(x.getChild(i),key);
 		}
 	}
-	
+	*/
 	/**
 	 * see slides page 46
 	 * @param x
 	 * @param i
 	 * @param y
 	 */
+	/*
 	public void splitChild(BTreeNode<TreeObject> x, int i, BTreeNode<TreeObject> y) {
 		BTreeNode<TreeObject> z = new BTreeNode<>();
 		z.setIsLeaf(y.getIsleaf());
@@ -310,7 +381,7 @@ public class BTree<T> {
 		x.addKey(y.getKey(minDeg-1), i);
 		x.setSize(x.getSize()+1);
     }
-	
+	*/
 	/**
 	 * 
 	 * @param x
