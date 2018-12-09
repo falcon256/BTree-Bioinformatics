@@ -128,6 +128,7 @@ public class BTree<T> {
 	{
 		if(spot.getSize()==maxDegree)
 		{
+			int oldTreeCount = countSubtrees(this.root,0);
 			if(verbose)
 			{
 				//System.out.println("Need to split node.\n"+spot.toString());					
@@ -137,6 +138,10 @@ public class BTree<T> {
 			{
 				//System.out.println("Split.\n"+spot.toString());					
 			}
+			int newTreeCount = countSubtrees(this.root,0);
+			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			if(newTreeCount<=oldTreeCount)
+				System.err.println("Split isn't working correctly, didn't add a new tree.");
 		}
 	}
 	
@@ -144,6 +149,23 @@ public class BTree<T> {
 	{
 		
 		boolean done = false;
+		
+		//debug code
+		int subtreeCount = 0;
+		int valueCount = 0;
+		int keyCount = 0;
+		for(int i = 0; i < maxDegree; i++)
+		{
+			if(node.getKeyAtIndex(i)!=0l&&node.getKeyAtIndex(i)!=-1l)
+				keyCount++;
+			if(node.getValueAtIndex(i)!=null)
+				valueCount++;
+		}
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(node.getSubTreeAtIndex(i)!=null)
+				subtreeCount++;
+		}
 		
 		//iterative shift to make sure we don't overwrite anything.
 		while(!done)
@@ -175,6 +197,29 @@ public class BTree<T> {
 				}
 			}
 		}
+		
+		//debug code
+		int newsubtreeCount = 0;
+		int newvalueCount = 0;
+		int newkeyCount = 0;
+		for(int i = 0; i < maxDegree; i++)
+		{
+			if(node.getKeyAtIndex(i)!=0l&&node.getKeyAtIndex(i)!=-1l)
+				newkeyCount++;
+			if(node.getValueAtIndex(i)!=null)
+				newvalueCount++;
+		}
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(node.getSubTreeAtIndex(i)!=null)
+				newsubtreeCount++;
+		}
+		System.out.println(""+keyCount+" "+newkeyCount);
+		System.out.println(""+valueCount+" "+newvalueCount);
+		System.out.println(""+subtreeCount+" "+newsubtreeCount);
+		if(keyCount!=newkeyCount||valueCount!=newvalueCount||subtreeCount!=newsubtreeCount)
+			System.err.println("shiftElementsLeft is destroying data.");
+		
 	}
 	
 	private void shiftElementsLeft(BTreeNode<T> node)
@@ -182,6 +227,24 @@ public class BTree<T> {
 		if(node.getSize()==maxDegree)
 			return;//this won't work if it is full
 		boolean done = false;
+		
+		
+		//debug code
+		int subtreeCount = 0;
+		int valueCount = 0;
+		int keyCount = 0;
+		for(int i = 0; i < maxDegree; i++)
+		{
+			if(node.getKeyAtIndex(i)!=0l&&node.getKeyAtIndex(i)!=-1l)
+				keyCount++;
+			if(node.getValueAtIndex(i)!=null)
+				valueCount++;
+		}
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(node.getSubTreeAtIndex(i)!=null)
+				subtreeCount++;
+		}
 		
 		//iterative shift to make sure we don't overwrite anything.
 		while(!done)
@@ -215,6 +278,29 @@ public class BTree<T> {
 				break;
 			}
 		}
+		
+		//debug code
+		int newsubtreeCount = 0;
+		int newvalueCount = 0;
+		int newkeyCount = 0;
+		for(int i = 0; i < maxDegree; i++)
+		{
+			if(node.getKeyAtIndex(i)!=0l&&node.getKeyAtIndex(i)!=-1l)
+				newkeyCount++;
+			if(node.getValueAtIndex(i)!=null)
+				newvalueCount++;
+		}
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(node.getSubTreeAtIndex(i)!=null)
+				newsubtreeCount++;
+		}
+		System.out.println(""+keyCount+" "+newkeyCount);
+		System.out.println(""+valueCount+" "+newvalueCount);
+		System.out.println(""+subtreeCount+" "+newsubtreeCount);
+		if(keyCount!=newkeyCount||valueCount!=newvalueCount||subtreeCount!=newsubtreeCount)
+			System.err.println("shiftElementsLeft is destroying data.");
+		
 	}
 	
 	/**
@@ -479,6 +565,19 @@ public class BTree<T> {
 		{
 			if(n.getSubTreeAtIndex(i)!=null)
 				count+=countItems(n.getSubTreeAtIndex(i),count);
+		}
+		return count;
+	}
+	
+	public int countSubtrees(BTreeNode<T> n, int count)
+	{
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(n.getSubTreeAtIndex(i)!=null)
+			{
+				count++;
+				count+=countItems(n.getSubTreeAtIndex(i),count);
+			}
 		}
 		return count;
 	}
