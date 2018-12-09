@@ -1,11 +1,8 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.Reader;
 
 
 
@@ -18,7 +15,6 @@ public class GeneBankCreateBTree {
 	private boolean setupFailed = false;
 	private File file = null;
 	private BufferedReader fileReader = null;
-	private FileInputStream fileStream = null;
 	private boolean withCache = false;
 	private int degree = 2;
 	private int sequenceLength = 31;
@@ -53,7 +49,7 @@ public class GeneBankCreateBTree {
 		try {
 			filePath=args[2];
 			file = new File(filePath);
-			fileStream = new FileInputStream(file);
+			//fileStream = new FileInputStream(file);
 			fileReader = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -114,7 +110,6 @@ public class GeneBankCreateBTree {
 				inLine = fileReader.readLine();
 			
 			inLine = fileReader.readLine();//skip the ORIGIN line before processing.
-			String inData = "";
 			String batch = "";
 			int offset = 0;
 			while(!inLine.contains("//"))
@@ -147,7 +142,7 @@ public class GeneBankCreateBTree {
 			}
 			
 			
-			
+			bt.writeToDisk(filePath+"btree.data."+sequenceLength+"."+degree,sequenceLength);
 			//iterate through all of our TreeObjects and write them
 			//for each ... file.write(treeObject.getBytes());
 

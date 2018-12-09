@@ -1,3 +1,10 @@
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 //import BTree.BTreeNode;//Dan - this is implied if they are both in the default package, otherwise lets move everything into a btree package.
 
 /**
@@ -65,6 +72,7 @@ public class BTree<T> {
 	public void insert(T obj, long key) {
 		BTreeNode<T> spot = InsertSearch(this.root,key);
 		//figure out if we need to shift.
+		checkForSplit(spot);
 		int offset = 0;
 		while(offset<maxDegree&&spot.getValueAtIndex(offset)!=null&&spot.getKeyAtIndex(offset)<key)
 		{
@@ -95,6 +103,9 @@ public class BTree<T> {
 				spot.setKeyAtIndex(spot.getKeyAtIndex(i-1), i);
 				spot.setValueAtIndex(spot.getValueAtIndex(i-1), i);
 				spot.setSubTreeAtIndex(spot.getSubTreeAtIndex(i), i+1);
+				spot.setKeyAtIndex(-1l, i-1);
+				spot.setValueAtIndex(null, i-1);
+				spot.setSubTreeAtIndex(null, i);
 			}
 		}
 		spot.setKeyAtIndex(-1l, offset);
@@ -210,6 +221,13 @@ public class BTree<T> {
 				System.out.println("Old Node: "+node);
 				System.out.println("New Node: "+newNode);
 			}
+			if(checkNodeSizing(newRoot))
+				System.err.println("Node size/element mismatch");
+			if(checkNodeSizing(node))
+				System.err.println("Node size/element mismatch");
+			if(checkNodeSizing(newNode))
+				System.err.println("Node size/element mismatch");
+
 			return;
 		}
 		if(node.getIsleaf()&&verbose)
@@ -257,6 +275,9 @@ public class BTree<T> {
 					parent.setKeyAtIndex(parent.getKeyAtIndex(i-1), i);
 					parent.setValueAtIndex(parent.getValueAtIndex(i-1), i);
 					parent.setSubTreeAtIndex(parent.getSubTreeAtIndex(i), i+1);
+					parent.setKeyAtIndex(-1,i-1);
+					parent.setValueAtIndex(null, i-1);
+					parent.setSubTreeAtIndex(null, i);
 				}
 			}
 
@@ -302,9 +323,6 @@ public class BTree<T> {
 				System.out.println(node);
 			if(verbose)
 				System.out.println(newNode);
-			
-			
-			
 			checkForSplit(parent);
 			
 		}
@@ -312,6 +330,55 @@ public class BTree<T> {
 		
 	}
 	
+	private boolean checkNodeSizing(BTreeNode<T> node)
+	{
+		int count = 0;
+		for(int i = 0; i < maxDegree; i++)
+			if(node.getValueAtIndex(i)!=null)
+				count++;
+		return count!=node.getSize();
+	}
+	
+	public void writeToDisk(String path,int seql) throws IOException
+	{
+		FileOutputStream file = new FileOutputStream(path);
+		BufferedOutputStream bos = new BufferedOutputStream(file);
+		DataOutputStream dos = new DataOutputStream(bos);
+		dos.writeInt(maxDegree);
+		dos.writeInt(seql);
+		writeTreeToDisk(dos, this.root, 8);
+		
+	}
+	
+	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
+	{
+		int size = 17*maxDegree;//17 bytes
+		if(node!=null)
+		{
+			
+			for(int i = 0; i < maxDegree; i++)
+			{
+				dos.writeBoolean(node.getValueAtIndex(i)==null?false:true);//writes one byte, true if it has a child here.
+				dos.writeLong(node.getKeyAtIndex(i));//writes 8 bytes, keys and values are the same for this system.
+				dos.writeLong(offset + i*size);//the offset of our next child node object.
+			}
+			for(int i = 0; i <= maxDegree; i++)
+			{
+				if(!node.getIsleaf())
+					writeTreeToDisk(dos,node.getSubTreeAtIndex(i),offset+size);
+			}
+		}
+		else
+		{
+			for(int i = 0; i < maxDegree; i++)
+			{
+				dos.writeBoolean(false);
+				dos.writeLong(0);
+				dos.writeLong(0);
+			}
+		}
+		
+	}
 	
 	/**
 	 * 
@@ -450,96 +517,7 @@ public class BTree<T> {
 		//TODO
 	}
 	
-	/**
-	 * Dan - this might interface with a method in GeneBankSearch for actual disk access or might totally be relocated there.
-	 * @param offset
-	 */
-	private long diskRead(int offset)
-	{
-		return 0;//TODO
-	}
-	
-	
 
-	/**
-	 * 
-	 * @param x
-	 * @param key
-	 */
-	/*
-	private void InsertNonFull(BTreeNode<TreeObject> x, long key){
-		// Initialize index as index of rightmost element 
-		int i = x.getSize()-1;
-		// If this is a leaf node 
-		if(x.getIsleaf()) {
-			// The following loop does two things 
-	        // a) Finds the location of new key to be inserted 
-	        // b) Moves all greater keys to one place ahead 
-			while(i >= 0 && x.getKey(i).getData() > key) {
-				x.addKey(x.getKey(i),i+1);
-				i--;
-			}
-			// Insert the new key at found location 
-			TreeObject nTreeObject = new TreeObject(key);
-			x.addKey(nTreeObject,i+1);
-			x.setSize(x.getSize()+1);
-		}else {// If this node is not leaf 
-			 // Find the child which is going to have the new key 
-			while(i>=0 && x.getKey(i).getData() > key) {
-				i--;
-			}
-			 // See if the found child is full 
-			if(x.getChild(i+1).getSize() == maxDeg -1) {
-				// If the child is full, then split it 
-				splitChild(x,i+1,x.getChild(i+1));
-				// After split, the middle key of x.child(i) goes up and splitted into two.  See which of the two is going to have the new key 
-				if(x.getKey(i+1).getData() < key) {
-					i++;
-				}
-			}
-			InsertNonFull(x.getChild(i),key);
-		}
-	}
-	*/
-	/**
-	 * see slides page 46
-	 * @param x
-	 * @param i
-	 * @param y
-	 */
-	/*
-	public void splitChild(BTreeNode<TreeObject> x, int i, BTreeNode<TreeObject> y) {
-		BTreeNode<TreeObject> z = new BTreeNode<>();
-		z.setIsLeaf(y.getIsleaf());
-		z.setSize(minDeg-1);
-		 // Copy the last (t-1) keys of y to z
-		for(int j = 0; j < minDeg-1; j++) {
-			z.addKey(y.getKey(j+minDeg));
-		}
-		// Copy the last t children of y to z 
-		if(!y.getIsleaf()) {
-			for(int j = 0; j<minDeg;j++) {
-				z.addChild(y.getChild(j+minDeg));
-			}
-		}
-		// Reduce the number of keys in y 
-		y.setSize(minDeg-1);
-		 // Since this node is going to have a new child, 
-	    // create space of new child 
-		for(int j = x.getSize(); j>=i+1;j--) {
-			x.addChild(x.getChild(j),j+1);
-		}
-		// Link the new child to this node 
-		x.addChild(z,i+1);
-		// A key of y will move to this node. Find location of 
-	    // new key and move all greater keys one space ahead
-		for(int j = x.getSize()-1;j>=i;j--) {
-			x.addKey(x.getKey(j), j+1);
-		}
-		x.addKey(y.getKey(minDeg-1), i);
-		x.setSize(x.getSize()+1);
-    }
-	*/
 	/**
 	 * 
 	 * @param x
