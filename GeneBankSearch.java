@@ -90,7 +90,7 @@ public class GeneBankSearch {
 		sequenceLength = bTreeFile.readInt();
 		long startPoint = bTreeFile.readLong();
 		System.out.println("Root at: "+startPoint);
-		System.out.println(""+bTreeFile.readBoolean() + TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong()));
+		//System.out.println(""+bTreeFile.readBoolean() + TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong()));
 		//TODO iterate over the query and get our output data.
 		boolean done = false;
 		while(!done)
@@ -98,7 +98,7 @@ public class GeneBankSearch {
 			String queryString = qFileReader.readLine();
 			if(queryString==null)
 				break;
-			System.out.println(queryString);
+			System.out.println("Looking for "+queryString);
 			long queryKey = TreeObject.encode(queryString);
 			int count = query(queryKey, startPoint);
 			
@@ -124,18 +124,19 @@ public class GeneBankSearch {
 			totalRead++;
 			if(keys[i]==key)
 				count++;
-			if(verbose&&keys[i]!=0l&&keys[i]!=-1l)
-				System.out.println(TreeObject.decode(keys[i]));
+			//if(verbose&&keys[i]!=0l&&keys[i]!=-1l)
+			//	System.out.println(TreeObject.decode(keys[i]));
 		}
 		for(int i = 0; i <= degree; i++)
 		{
 			hasSubTrees[i]=bTreeFile.readBoolean();
 			offsets[i]=bTreeFile.readLong();
-			if(verbose)
-				System.out.println(hasSubTrees[i]+" "+offsets[i]);
+			//if(verbose)
+			//	System.out.println(hasSubTrees[i]+" "+offsets[i]);
 		}
-		System.out.println("Alignment sanity check 256="+bTreeFile.readInt());
-		System.out.println(bTreeFile.getFilePointer());
+		int sanity = bTreeFile.readInt();
+		//System.out.println("Alignment sanity check 256="+sanity);
+		//System.out.println(bTreeFile.getFilePointer());
 		int test = 0;
 		while(test<degree&&keys[test]>key)
 			test++;
@@ -147,10 +148,20 @@ public class GeneBankSearch {
 		}
 		if(offsets[test]<=0&&hasSubTrees[test]||offsets[test+1]<=0&&hasSubTrees[test+1])
 			System.err.println("A NEGATIVE offset value? That's problematic.");
-		if(hasSubTrees[test])
-			count+= query(key, offsets[test]);
-		if(hasSubTrees[test+1])
-			count+= query(key, offsets[test+1]);
+		//if(hasSubTrees[test])
+		//	count+= query(key, offsets[test]);
+		//if(hasSubTrees[test+1])
+		//	count+= query(key, offsets[test+1]);
+		
+		// temp code to make sure things exist in the tree
+		
+		for(int i = 0; i <= degree; i++)
+		{
+			if(hasSubTrees[i])
+				count+= query(key, offsets[i]);
+		}
+		
+		
 		return count;
 	}
 
