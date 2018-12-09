@@ -18,7 +18,7 @@ public class BTree<T> {
 	private int minDegree;
 	private int maxDegree;
 	private boolean verbose = false;
-	
+	private int itemsWritten = 0;
 	public BTree(int degree){
 		maxDegree = degree;
 		minDegree = degree/2;
@@ -86,6 +86,7 @@ public class BTree<T> {
 			spot.setValueAtIndex(obj, offset);
 			spot.setSize(spot.getSize()+1);
 			checkForSplit(spot);
+			System.out.println("Total items"+countItems(root, 0));
 			return;
 		}
 		/*
@@ -100,6 +101,8 @@ public class BTree<T> {
 		{
 			if(spot.getValueAtIndex(i-1)!=null)
 			{
+				if(spot.getSubTreeAtIndex(i)!=null)
+					System.err.println("Node Overwritten.");
 				spot.setKeyAtIndex(spot.getKeyAtIndex(i-1), i);
 				spot.setValueAtIndex(spot.getValueAtIndex(i-1), i);
 				spot.setSubTreeAtIndex(spot.getSubTreeAtIndex(i), i+1);
@@ -123,6 +126,8 @@ public class BTree<T> {
 		spot.setKeyAtIndex(key, offset);
 		spot.setValueAtIndex(obj, offset);
 		spot.setSize(spot.getSize()+1);
+
+		System.out.println("Total items"+countItems(root, 0));
 		checkForSplit(spot);
 	}
 	
@@ -193,6 +198,8 @@ public class BTree<T> {
 			node.setValueAtIndex(null, minDegree);
 			node.setSize(node.getSize()-1);
 			newRoot.setSize(1);
+			System.out.println("New Node: "+newNode);
+			System.out.println("New Node: "+node);
 			for(int i = minDegree+1; i < maxDegree; i++)
 			{
 				newNode.setKeyAtIndex(node.getKeyAtIndex(i),i-minDegree-1);
@@ -205,8 +212,12 @@ public class BTree<T> {
 					node.setSize(node.getSize()-1);
 				}
 			}
+			System.out.println("New Node: "+newNode);
+			System.out.println("New Node: "+node);
 			for(int i = minDegree+1; i <= maxDegree; i++)
 			{
+				if(newNode.getSubTreeAtIndex(i-minDegree)!=null)
+					System.err.println("Node Overwritten.");
 				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree);
 				node.setSubTreeAtIndex(null, i);
 			}
@@ -272,13 +283,15 @@ public class BTree<T> {
 			if(verbose)
 				System.out.println("Promoting " + midKey + " after shifting.");		
 			if(verbose)
-				System.out.print(parent);
+				System.out.print("\nP"+parent);
 			if(verbose)
 				System.out.print(node);
 			for(int i = maxDegree-1; i > offset; i--)
 			{
 				if(parent.getValueAtIndex(i-1)!=null)
 				{
+					if(parent.getSubTreeAtIndex(i+1)!=null)
+						System.err.println("Node Overwritten.");
 					parent.setKeyAtIndex(parent.getKeyAtIndex(i-1), i);
 					parent.setValueAtIndex(parent.getValueAtIndex(i-1), i);
 					parent.setSubTreeAtIndex(parent.getSubTreeAtIndex(i), i+1);
@@ -292,7 +305,10 @@ public class BTree<T> {
 			parent.setKeyAtIndex(-1l, offset);
 			parent.setValueAtIndex(null, offset);
 			parent.setSubTreeAtIndex(null, offset);
-
+			if(verbose)
+				System.out.println("\nP"+parent);
+			if(verbose)
+				System.out.println(node);
 			parent.setKeyAtIndex(midKey, offset);
 			parent.setValueAtIndex(node.getValueAtIndex(minDegree), offset);
 			node.setKeyAtIndex(-1l, minDegree);
@@ -321,6 +337,8 @@ public class BTree<T> {
 			}
 			for(int i = minDegree+1; i <= maxDegree; i++)
 			{
+				if(node.getSubTreeAtIndex(i-minDegree)!=null)
+					System.err.println("Node Overwritten.");
 				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree);
 				node.setSubTreeAtIndex(null, i);
 			}
@@ -348,6 +366,7 @@ public class BTree<T> {
 	
 	public void writeToDisk(String path,int seql) throws IOException
 	{
+		itemsWritten=0;
 		FileOutputStream file = new FileOutputStream(path);
 		BufferedOutputStream bos = new BufferedOutputStream(file);
 		DataOutputStream dos = new DataOutputStream(bos);
@@ -358,8 +377,23 @@ public class BTree<T> {
 		dos.close();
 	}
 	
-	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
+	public int countItems(BTreeNode<T> n, int count)
 	{
+		for(int i = 0; i < maxDegree; i++)
+		{
+			if(n.getValueAtIndex(i)!=null)
+				count++;
+		}
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(n.getSubTreeAtIndex(i)!=null)
+				count+=countItems(n.getSubTreeAtIndex(i),count);
+		}
+		return count;
+	}
+	
+	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
+	{		
 		int size = 8*maxDegree + 9*(maxDegree+1);//8 bytes per key, 9 bytes per possible link.
 		if(node!=null)
 		{
@@ -367,6 +401,10 @@ public class BTree<T> {
 			for(int i = 0; i < maxDegree; i++)
 			{
 				dos.writeLong(node.getKeyAtIndex(i));//writes 8 bytes, keys and values are the same for this system.
+				if(verbose&&node.getValueAtIndex(i)!=null)
+				{
+					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written. "+ ++itemsWritten+" total");
+				}
 			}
 			for(int i = 0; i < maxDegree; i++)
 			{

@@ -52,9 +52,9 @@ private long data;//the 1-31 As Cs Gs or Ts
 	public static String decode(long l)
 	{
 		String s = "";
-		for(int i = 0; i < 31; i++)
+		for(long i = 0; i < 31; i++)
 		{
-			s+= (l>>i*2)&3;//lowest two bits as we scroll through.
+			s+= bitcodeToChar((int)((l>>i*2l)&3l));//lowest two bits as we scroll through.
 		}
 		return s;
 	}
@@ -90,10 +90,10 @@ private long data;//the 1-31 As Cs Gs or Ts
 	/**
 	 * 
 	 */
-	private static long placeCharAtPosition(long modifiedLong, int code, int offset)
+	private static long placeCharAtPosition(long modifiedLong, long code, long offset)
 	{
 		
-		return modifiedLong | (code<<(offset*2));
+		return modifiedLong | (code<<(offset*2l));
 	}
 
 	/**
@@ -123,7 +123,24 @@ private long data;//the 1-31 As Cs Gs or Ts
 		}
 		
 	}
-
+	
+	private static char bitcodeToChar(int i)
+	{
+		switch(i)
+		{
+		case(0):
+			return 'a';
+		case(1):
+			return 'c';
+		case(2):
+			return 'g';
+		case(3):
+			return 't';
+		default:
+			return 'F';//TODO - what exception should we throw?
+		}
+		
+	}
 	@Override
 	public String toString()
 	{

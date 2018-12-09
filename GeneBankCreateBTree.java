@@ -86,7 +86,7 @@ public class GeneBankCreateBTree {
 	{
 		if(setupFailed)
 			return;
-		
+		int count = 0;
 		//get ready to start writing.
 		try {
 			
@@ -134,6 +134,11 @@ public class GeneBankCreateBTree {
 					long key = TreeObject.encode(batch);
 					TreeObject t = new TreeObject(key);
 					bt.insert(t, key);
+					//if(verbosity>0)
+					//	System.out.println(batch+" Read as key "+key+" which decodes to "+TreeObject.decode(key));
+					
+					
+					count++;
 					batch = "";
 					
 				}
@@ -149,7 +154,8 @@ public class GeneBankCreateBTree {
 			//and we are done.
 			//file.close();
 			
-			
+			if(verbosity>0)
+				System.out.println("Number of items loaded: "+count);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
