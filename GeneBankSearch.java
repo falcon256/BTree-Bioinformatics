@@ -127,15 +127,21 @@ public class GeneBankSearch {
 			if(verbose)
 				System.out.println(hasSubTrees[i]+" "+offsets[i]);
 		}
-		if(key<keys[0]&&hasSubTrees[0])
-			count+= query(key, offsets[0]);
-		for(int i = 0; i < degree; i++)
+		System.out.println("Alignment sanity check 256="+bTreeFile.readInt());
+		System.out.println(bTreeFile.getFilePointer());
+		int test = 0;
+		while(test<degree&&keys[test]>key)
+			test++;
+		if(offsets[test]==offset)
 		{
-			if(keys[i]>key&&keys[i+1]<key&&hasSubTrees[i+1])
-				count+= query(key, offsets[i]);
+			System.err.println("This node is referencing itself as a child!");
+			System.err.println("!!!ABORTING STACK OVERFLOW!!!");
+			return count;
 		}
-		if(key>keys[degree-1]&&hasSubTrees[degree])
-			count+= query(key, offsets[degree]);
+		if(hasSubTrees[test])
+			count+= query(key, offsets[test]);
+		if(hasSubTrees[test+1])
+			count+= query(key, offsets[test+1]);
 		return count;
 	}
 

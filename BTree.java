@@ -321,6 +321,7 @@ public class BTree<T> {
 		long midKey = node.getKeyAtIndex(minDegree);
 		int offset = 0;
 		BTreeNode<T> parent = node.getParentNode();
+		shiftElementsLeft(parent);
 		while(offset<maxDegree&&parent.getValueAtIndex(offset)!=null&&parent.getKeyAtIndex(offset)<midKey)
 		{
 			offset++;
@@ -336,7 +337,7 @@ public class BTree<T> {
 			parent.setSubTreeAtIndex(newNode, offset+1);
 			node.setKeyAtIndex(-1l, minDegree);
 			node.setValueAtIndex(null, minDegree);
-			node.setSubTreeAtIndex(null, minDegree);
+			node.setSubTreeAtIndex(null, minDegree);//make sure this is right.
 			newNode.setParentNode(parent);
 			newNode.setParentIndex(offset);
 			parent.setSize(parent.getSize()+1);
@@ -376,24 +377,24 @@ public class BTree<T> {
 			if(verbose)
 				System.out.println("Promoting " + midKey + " after shifting.");		
 			if(verbose)
-				System.out.print("\nP"+parent);
+				System.out.print(parent);
 			if(verbose)
 				System.out.print(node);
 			shiftElementsRight(parent,offset);
-
-			
-			parent.setKeyAtIndex(-1l, offset);
-			parent.setValueAtIndex(null, offset);
-			parent.setSubTreeAtIndex(null, offset);
 			if(verbose)
 				System.out.println("\nP"+parent);
 			if(verbose)
 				System.out.println(node);
 			parent.setKeyAtIndex(midKey, offset);
 			parent.setValueAtIndex(node.getValueAtIndex(minDegree), offset);
+			if(parent.getSubTreeAtIndex(offset)!=null)
+				System.out.println("Parent doesn't have open position for new node.");
+			parent.setSubTreeAtIndex(newNode, offset);
+			newNode.setParentNode(parent);
+			newNode.setParentIndex(offset);
 			node.setKeyAtIndex(-1l, minDegree);
 			node.setValueAtIndex(null, minDegree);
-			node.setSubTreeAtIndex(null, minDegree);
+			node.setSubTreeAtIndex(null, minDegree);//TODO make sure this is right
 			parent.setSize(parent.getSize()+1);
 			node.setSize(node.getSize()-1);
 			
@@ -477,15 +478,15 @@ public class BTree<T> {
 	
 	public void printTree(BTreeNode<T> n, int count)
 	{
-		System.out.println("\nUID: "+n.getUID()+" Level: "+count+" Size: "+n.getSize()+" isRoot: "+n.getIsRoot()+" isLeaf: "+n.getIsleaf());
+		System.out.println("\nUID: "+n.getUID()+" Level: "+count+" Size: "+n.getSize()+" isRoot: "+n.getIsRoot()+" isLeaf: "+n.getIsleaf()+" Parent: "+(n.getParentNode()!=null?n.getParentNode().getUID():"none"));
 		for(int i = 0; i < maxDegree; i++)
 		{
-			System.out.print(n.getValueAtIndex(i)!=null?"X ":". ");
+			System.out.print(n.getValueAtIndex(i)!=null?n.getValueAtIndex(i)+" ":". ");
 		}
 		System.out.println();
 		for(int i = 0; i <= maxDegree; i++)
 		{
-			System.out.print(n.getSubTreeAtIndex(i)!=null?"T ":". ");
+			System.out.print(n.getSubTreeAtIndex(i)!=null?n.getSubTreeAtIndex(i).getUID():". ");
 		}
 
 		for(int i = 0; i <= maxDegree; i++)
@@ -498,7 +499,7 @@ public class BTree<T> {
 	
 	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
 	{		
-		int size = 8*maxDegree + 9*(maxDegree+1);//8 bytes per key, 9 bytes per possible link.
+		int size = 8*maxDegree + 9*(maxDegree+1) + 4;//8 bytes per key, 9 bytes per possible link. +4 alignment sanity check for testing
 		if(node!=null)
 		{
 			
@@ -510,25 +511,35 @@ public class BTree<T> {
 					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written. "+ ++itemsWritten+" total");
 				}
 			}
-			for(int i = 0; i < maxDegree; i++)
+			for(int i = 0; i <= maxDegree; i++)
 			{
-				dos.writeBoolean(node.getValueAtIndex(i)==null?false:true);//writes one byte, true if it has a child here.
-				dos.writeLong(offset + i*size);//the offset of our next child node object.
+				dos.writeBoolean(node.getSubTreeAtIndex(i)==null?false:true);//writes one byte, true if it has a child here.
+				dos.writeLong(offset + (i+1)*size);//the offset of our next child node object.
 			}
+			System.out.println(dos.size());
+			dos.writeInt(256);
 			for(int i = 0; i <= maxDegree; i++)
 			{
 				if(!node.getIsleaf())
 					writeTreeToDisk(dos,node.getSubTreeAtIndex(i),offset+size);
 			}
+			
+			
 		}
 		else
 		{
 			for(int i = 0; i < maxDegree; i++)
 			{
+				dos.writeLong(0);
+				
+			}
+			for(int i = 0; i <= maxDegree; i++)
+			{
 				dos.writeBoolean(false);
 				dos.writeLong(0);
-				dos.writeLong(0);
 			}
+			
+			dos.writeInt(256);
 		}
 		
 	}

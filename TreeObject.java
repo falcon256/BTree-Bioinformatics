@@ -7,7 +7,9 @@ public class TreeObject {
 
 	
 private long data;//the 1-31 As Cs Gs or Ts
-	
+private static int uidCounter = 0;
+private int uid = 0;
+
 	/**
 	 * 
 	 * @param key - the key and the value of this object.
@@ -15,6 +17,7 @@ private long data;//the 1-31 As Cs Gs or Ts
 	public TreeObject(long key)
 	{
 		data = key;
+		uid = uidCounter++;
 	}
 
 	/**
@@ -144,7 +147,8 @@ private long data;//the 1-31 As Cs Gs or Ts
 	@Override
 	public String toString()
 	{
-		return decode(data);		
+		return ""+uid;
+		//return decode(data);		
 	}
 	
 	
