@@ -328,7 +328,14 @@ public class BTree<T> {
 	
 	public void splitNode(BTreeNode<T> node)
 	{
+		//debug code
 		int oldTreeCount = countSubtrees(this.root,0);
+		if(oldTreeCount==9)//an error is happening here, somewhere in this method.
+		{
+			int debug = 0;//breakpoint
+		}
+		
+		
 		if(node.getIsRoot())
 		{
 			if(verbose)
@@ -616,7 +623,7 @@ public class BTree<T> {
 			if(n.getSubTreeAtIndex(i)!=null)
 			{
 				count++;
-				count+=countItems(n.getSubTreeAtIndex(i),count);
+				count+=countSubtrees(n.getSubTreeAtIndex(i),0);
 			}
 		}
 		return count;
