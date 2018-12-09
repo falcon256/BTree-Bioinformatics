@@ -87,6 +87,7 @@ public class BTree<T> {
 			spot.setSize(spot.getSize()+1);
 			checkForSplit(spot);
 			System.out.println("Total items"+countItems(root, 0));
+			printTree(root,0);
 			return;
 		}
 		/*
@@ -97,20 +98,8 @@ public class BTree<T> {
 		*/
 
 		//going to need to shift right.
-		for(int i = maxDegree-1; i > offset; i--)
-		{
-			if(spot.getValueAtIndex(i-1)!=null)
-			{
-				if(spot.getSubTreeAtIndex(i)!=null)
-					System.err.println("Node Overwritten.");
-				spot.setKeyAtIndex(spot.getKeyAtIndex(i-1), i);
-				spot.setValueAtIndex(spot.getValueAtIndex(i-1), i);
-				spot.setSubTreeAtIndex(spot.getSubTreeAtIndex(i), i+1);
-				spot.setKeyAtIndex(-1l, i-1);
-				spot.setValueAtIndex(null, i-1);
-				spot.setSubTreeAtIndex(null, i);
-			}
-		}
+		
+		shiftElementsRight(spot,offset);
 		spot.setKeyAtIndex(-1l, offset);
 		spot.setValueAtIndex(null, offset);
 		spot.setSubTreeAtIndex(null, offset);
@@ -126,9 +115,11 @@ public class BTree<T> {
 		spot.setKeyAtIndex(key, offset);
 		spot.setValueAtIndex(obj, offset);
 		spot.setSize(spot.getSize()+1);
-
+		shiftElementsLeft(spot);
 		System.out.println("Total items"+countItems(root, 0));
 		checkForSplit(spot);
+		printTree(root,0);
+		int debug = 0;
 	}
 	
 	private void checkForSplit(BTreeNode<T> spot)
@@ -137,12 +128,89 @@ public class BTree<T> {
 		{
 			if(verbose)
 			{
-				System.out.println("Need to split node.\n"+spot.toString());					
+				//System.out.println("Need to split node.\n"+spot.toString());					
 			}
 			splitNode(spot);
 			if(verbose)
 			{
-				System.out.println("Split.\n"+spot.toString());					
+				//System.out.println("Split.\n"+spot.toString());					
+			}
+		}
+	}
+	
+	private void shiftElementsRight(BTreeNode<T> node, int offset)
+	{
+		
+		boolean done = false;
+		
+		//iterative shift to make sure we don't overwrite anything.
+		while(!done)
+		for(int i = maxDegree-2; i >= offset&&!done; i--)
+		{
+			if(node.getValueAtIndex(offset)==null)
+			{
+				done=true;
+				break;
+			}
+			if(node.getValueAtIndex(i+1)==null)
+			{
+				node.setKeyAtIndex(node.getKeyAtIndex(i), i+1);
+				node.setValueAtIndex(node.getValueAtIndex(i), i+1);				
+				node.setKeyAtIndex(-1l, i);
+				node.setValueAtIndex(null, i);
+				
+				if(i+2<=maxDegree+1&&node.getSubTreeAtIndex(i+2)!=null&&node.getSubTreeAtIndex(i+1)!=null)
+					System.err.println("We can't move a node, so it is going to be out of order.");//can't do anything in this case.
+				if(i+2<=maxDegree+1&&node.getSubTreeAtIndex(i+2)==null&&node.getSubTreeAtIndex(i+1)!=null)
+				{
+					node.setSubTreeAtIndex(node.getSubTreeAtIndex(i+1), i+2);
+					node.setSubTreeAtIndex(null, i+1);
+				}
+				if(node.getSubTreeAtIndex(i+1)==null&&node.getSubTreeAtIndex(i)!=null)
+				{
+					node.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i+1);
+					node.setSubTreeAtIndex(null, i);
+				}
+			}
+		}
+	}
+	
+	private void shiftElementsLeft(BTreeNode<T> node)
+	{
+		if(node.getSize()==maxDegree)
+			return;//this won't work if it is full
+		boolean done = false;
+		
+		//iterative shift to make sure we don't overwrite anything.
+		while(!done)
+		for(int i = maxDegree-1; i>0 &&!done; i--)
+		{			
+			if(node.getValueAtIndex(i-1)==null)
+			{
+				//if(node.getSubTreeAtIndex(i)!=null)
+				//	System.err.println("We are overwriting stuff.");
+				node.setKeyAtIndex(node.getKeyAtIndex(i), i-1);
+				node.setValueAtIndex(node.getValueAtIndex(i), i-1);				
+				node.setKeyAtIndex(-1l, i);
+				node.setValueAtIndex(null, i);
+				
+				if(node.getSubTreeAtIndex(i-1)!=null&&node.getSubTreeAtIndex(i)!=null)
+					System.err.println("We can't move a node, so it is going to be out of order.");//can't do anything in this case.
+				if(node.getSubTreeAtIndex(i-1)==null&&node.getSubTreeAtIndex(i)!=null)
+				{
+					node.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-1);
+					node.setSubTreeAtIndex(null, i);
+				}
+				if(node.getSubTreeAtIndex(i)==null&&node.getSubTreeAtIndex(i+1)!=null)
+				{
+					node.setSubTreeAtIndex(node.getSubTreeAtIndex(i+1), i);
+					node.setSubTreeAtIndex(null, i+1);
+				}
+			}
+			if(node.getValueAtIndex(maxDegree-1)==null)
+			{
+				done=true;
+				break;
 			}
 		}
 	}
@@ -157,12 +225,6 @@ public class BTree<T> {
 	{
 		if(start.getIsleaf())
 		{	
-			int offset = 0;
-			while(offset<maxDegree-1&&start.getValueAtIndex(offset)!=null&&start.getKeyAtIndex(offset)<key)
-			{
-				offset++;
-			}
-			//TODO check if this is needed.
 			return start;
 		}
 		//not leaf
@@ -216,14 +278,17 @@ public class BTree<T> {
 			System.out.println("New Node: "+node);
 			for(int i = minDegree+1; i <= maxDegree; i++)
 			{
-				if(newNode.getSubTreeAtIndex(i-minDegree)!=null)
-					System.err.println("Node Overwritten.");
-				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree);
+				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
 				node.setSubTreeAtIndex(null, i);
 			}
 			newRoot.setIsRoot(true);
+			
 			newRoot.setIsLeaf(false);
 			node.setIsRoot(false);
+			if(node.getIsleaf())
+			{
+				newNode.setIsLeaf(true);
+			}
 			newNode.setIsRoot(false);
 			this.root = newRoot;
 			if(verbose)
@@ -238,15 +303,21 @@ public class BTree<T> {
 				System.err.println("Node size/element mismatch");
 			if(checkNodeSizing(newNode))
 				System.err.println("Node size/element mismatch");
-
+			shiftElementsLeft(newRoot);
+			shiftElementsLeft(node);
+			shiftElementsLeft(newNode);
 			return;
 		}
+		BTreeNode<T> newNode = new BTreeNode<T>(maxDegree);
 		if(node.getIsleaf()&&verbose)
+		{
 				System.out.println("Splitnode splitting leaf");
+				newNode.setIsLeaf(true);
+		}
 		if(!node.getIsleaf()&&verbose)
 			System.out.println("Splitnode splitting non-root non-leaf node");
 		
-		BTreeNode<T> newNode = new BTreeNode<T>(maxDegree);
+		
 		long midKey = node.getKeyAtIndex(minDegree);
 		int offset = 0;
 		BTreeNode<T> parent = node.getParentNode();
@@ -276,6 +347,28 @@ public class BTree<T> {
 				System.err.println("Node size/element mismatch");
 			if(checkNodeSizing(newNode))
 				System.err.println("Node size/element mismatch");
+			for(int i = minDegree+1; i < maxDegree; i++)
+			{
+				newNode.setKeyAtIndex(node.getKeyAtIndex(i),i-minDegree-1);
+				newNode.setValueAtIndex(node.getValueAtIndex(i), i-minDegree-1);
+				if(node.getValueAtIndex(i)!=null)
+				{
+					node.setKeyAtIndex(-1l, i);
+					node.setValueAtIndex(null, i);
+					newNode.setSize(newNode.getSize()+1);
+					node.setSize(node.getSize()-1);
+				}
+			}
+			System.out.println("New Node: "+newNode);
+			System.out.println("New Node: "+node);
+			for(int i = minDegree+1; i <= maxDegree; i++)
+			{
+				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
+				node.setSubTreeAtIndex(null, i);
+			}
+			shiftElementsLeft(node);
+			shiftElementsLeft(newNode);	
+			shiftElementsLeft(parent);
 			checkForSplit(parent);
 		}
 		else
@@ -286,20 +379,7 @@ public class BTree<T> {
 				System.out.print("\nP"+parent);
 			if(verbose)
 				System.out.print(node);
-			for(int i = maxDegree-1; i > offset; i--)
-			{
-				if(parent.getValueAtIndex(i-1)!=null)
-				{
-					if(parent.getSubTreeAtIndex(i+1)!=null)
-						System.err.println("Node Overwritten.");
-					parent.setKeyAtIndex(parent.getKeyAtIndex(i-1), i);
-					parent.setValueAtIndex(parent.getValueAtIndex(i-1), i);
-					parent.setSubTreeAtIndex(parent.getSubTreeAtIndex(i), i+1);
-					parent.setKeyAtIndex(-1,i-1);
-					parent.setValueAtIndex(null, i-1);
-					parent.setSubTreeAtIndex(null, i);
-				}
-			}
+			shiftElementsRight(parent,offset);
 
 			
 			parent.setKeyAtIndex(-1l, offset);
@@ -337,11 +417,14 @@ public class BTree<T> {
 			}
 			for(int i = minDegree+1; i <= maxDegree; i++)
 			{
-				if(node.getSubTreeAtIndex(i-minDegree)!=null)
+				if(newNode.getSubTreeAtIndex(i-minDegree-1)!=null)
 					System.err.println("Node Overwritten.");
-				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree);
+				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
 				node.setSubTreeAtIndex(null, i);
 			}
+			shiftElementsLeft(node);
+			shiftElementsLeft(newNode);	
+			shiftElementsLeft(parent);
 			if(verbose)
 				System.out.println("Moved elements to new node.");
 			if(verbose)
@@ -390,6 +473,27 @@ public class BTree<T> {
 				count+=countItems(n.getSubTreeAtIndex(i),count);
 		}
 		return count;
+	}
+	
+	public void printTree(BTreeNode<T> n, int count)
+	{
+		System.out.println("\nUID: "+n.getUID()+" Level: "+count+" Size: "+n.getSize()+" isRoot: "+n.getIsRoot()+" isLeaf: "+n.getIsleaf());
+		for(int i = 0; i < maxDegree; i++)
+		{
+			System.out.print(n.getValueAtIndex(i)!=null?"X ":". ");
+		}
+		System.out.println();
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			System.out.print(n.getSubTreeAtIndex(i)!=null?"T ":". ");
+		}
+
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(n.getSubTreeAtIndex(i)!=null)
+				printTree(n.getSubTreeAtIndex(i),count+1);
+		}
+		return;
 	}
 	
 	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException

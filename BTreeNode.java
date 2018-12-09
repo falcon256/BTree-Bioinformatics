@@ -11,7 +11,8 @@ public class BTreeNode<T> {
 	private BTreeNode<T> parentNode = null;
 	private int parentIndex = 0;
 	private boolean isRoot;
-	
+	private static int uidCounter = 0;
+	private int uid = 0;
 	// size should probably be max+1 to allow merging then promoting.
 	private long[] keys = null;
 	private T[] values = null;
@@ -29,6 +30,7 @@ public class BTreeNode<T> {
 	@SuppressWarnings("unchecked")
 	public BTreeNode(int degree)
 	{
+		uid = uidCounter++;
 		parentIndex = -1;
 		keys = new long[degree];
 		values = (T[]) new Object[degree];
@@ -50,6 +52,11 @@ public class BTreeNode<T> {
 		{
 			subTrees[i]=null;
 		}
+	}
+	
+	public int getUID()
+	{
+		return uid;
 	}
 	
 	/**
@@ -219,8 +226,7 @@ public class BTreeNode<T> {
 	@Override   
 	public String toString()
 	{
-		String s = "";
-		s+="Node: Size: "+this.getSize()+"\nKeys: ";
+		String s = "\nUID: "+uid+" Node: Size: "+this.getSize()+"\nKeys: ";;
 		for(int i = 0; i <keys.length; i++)
 			s+=getKeyAtIndex(i)+ " ";
 		s+="\nSubtrees: ";
