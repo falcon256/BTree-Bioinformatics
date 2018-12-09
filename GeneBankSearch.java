@@ -18,6 +18,7 @@ public class GeneBankSearch {
 	private BufferedReader qFileReader = null;
 	private int degree = 1;
 	private int sequenceLength = 31;
+	private int totalRead = 0;
 	private boolean verbose = false;
 	/**
 	 * 
@@ -87,7 +88,8 @@ public class GeneBankSearch {
 		//TODO read in our metadata and read in the root of the btree.
 		degree = bTreeFile.readInt();
 		sequenceLength = bTreeFile.readInt();
-		long startPoint = bTreeFile.getFilePointer();
+		long startPoint = bTreeFile.readLong();
+		System.out.println("Root at: "+startPoint);
 		System.out.println(""+bTreeFile.readBoolean() + TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong()));
 		//TODO iterate over the query and get our output data.
 		boolean done = false;
@@ -99,10 +101,14 @@ public class GeneBankSearch {
 			System.out.println(queryString);
 			long queryKey = TreeObject.encode(queryString);
 			int count = query(queryKey, startPoint);
+			
 			System.out.println(count);
+			
+			System.out.println(totalRead+" keys checked.");
 		}
 		
 	}
+	
 	
 	private int query(long key, long offset) throws IOException
 	{
@@ -115,9 +121,10 @@ public class GeneBankSearch {
 		for(int i = 0; i < degree; i++)
 		{
 			keys[i]=bTreeFile.readLong();
+			totalRead++;
 			if(keys[i]==key)
 				count++;
-			if(verbose)
+			if(verbose&&keys[i]!=0l&&keys[i]!=-1l)
 				System.out.println(TreeObject.decode(keys[i]));
 		}
 		for(int i = 0; i <= degree; i++)
@@ -138,6 +145,8 @@ public class GeneBankSearch {
 			System.err.println("!!!ABORTING STACK OVERFLOW!!!");
 			return count;
 		}
+		if(offsets[test]<=0&&hasSubTrees[test]||offsets[test+1]<=0&&hasSubTrees[test+1])
+			System.err.println("A NEGATIVE offset value? That's problematic.");
 		if(hasSubTrees[test])
 			count+= query(key, offsets[test]);
 		if(hasSubTrees[test+1])

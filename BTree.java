@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 //import BTree.BTreeNode;//Dan - this is implied if they are both in the default package, otherwise lets move everything into a btree package.
 
@@ -19,6 +20,7 @@ public class BTree<T> {
 	private int maxDegree;
 	private boolean verbose = false;
 	private int itemsWritten = 0;
+	private int nodeSize = 81;//8*maxDegree + 9*(maxDegree+1) + 4;//8 bytes per key, 9 bytes per possible link. +4 alignment sanity check for testing
 	public BTree(int degree){
 		maxDegree = degree;
 		minDegree = degree/2;
@@ -451,14 +453,19 @@ public class BTree<T> {
 	public void writeToDisk(String path,int seql) throws IOException
 	{
 		itemsWritten=0;
-		FileOutputStream file = new FileOutputStream(path);
-		BufferedOutputStream bos = new BufferedOutputStream(file);
-		DataOutputStream dos = new DataOutputStream(bos);
-		dos.writeInt(maxDegree);
-		dos.writeInt(seql);
-		writeTreeToDisk(dos, this.root, 8);
-		dos.flush();
-		dos.close();
+		RandomAccessFile bTreeFile = new RandomAccessFile(new File(path),"rw");
+		//FileOutputStream file = new FileOutputStream(path);
+		//BufferedOutputStream bos = new BufferedOutputStream(file);
+		//DataOutputStream dos = new DataOutputStream(bos);
+		//dos.writeInt(maxDegree);
+		//dos.writeInt(seql);
+		bTreeFile.writeInt(maxDegree);
+		bTreeFile.writeInt(seql);
+		bTreeFile.writeLong(16+this.root.getUID()*nodeSize);
+		//writeTreeToDisk(dos, this.root, 8);
+		writeTreeToDisk(bTreeFile, this.root, 16);
+		//dos.flush();
+		//dos.close();
 	}
 	
 	public int countItems(BTreeNode<T> n, int count)
@@ -497,51 +504,47 @@ public class BTree<T> {
 		return;
 	}
 	
-	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
+	public void writeTreeToDisk(RandomAccessFile dos, BTreeNode<T> node, long offset) throws IOException
 	{		
-		int size = 8*maxDegree + 9*(maxDegree+1) + 4;//8 bytes per key, 9 bytes per possible link. +4 alignment sanity check for testing
+		int size = nodeSize;
+		dos.seek(offset+size*node.getUID());
 		if(node!=null)
-		{
-			
+		{			
 			for(int i = 0; i < maxDegree; i++)
 			{
 				dos.writeLong(node.getKeyAtIndex(i));//writes 8 bytes, keys and values are the same for this system.
 				if(verbose&&node.getValueAtIndex(i)!=null)
 				{
-					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written. "+ ++itemsWritten+" total");
+					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written at :"+(offset+size*node.getUID())+". "+ ++itemsWritten+" total");
 				}
 			}
 			for(int i = 0; i <= maxDegree; i++)
 			{
-				dos.writeBoolean(node.getSubTreeAtIndex(i)==null?false:true);//writes one byte, true if it has a child here.
-				dos.writeLong(offset + (i+1)*size);//the offset of our next child node object.
+				if(node.getSubTreeAtIndex(i)!=null)
+				{
+					dos.writeBoolean(true);//writes one byte, true if it has a child here.
+					dos.writeLong(offset+size*node.getSubTreeAtIndex(i).getUID());//the offset of our next child node object.
+				}
+				else
+				{
+					dos.writeBoolean(false);
+					dos.writeLong(-1);
+				}
 			}
-			System.out.println(dos.size());
 			dos.writeInt(256);
+			System.out.println(dos.getFilePointer());
+			if(node.getIsRoot())
+				if(verbose)
+					System.out.println("***Root written at "+(offset+size*node.getUID())+"***");
+			
+			
+			
 			for(int i = 0; i <= maxDegree; i++)
 			{
-				if(!node.getIsleaf())
-					writeTreeToDisk(dos,node.getSubTreeAtIndex(i),offset+size);
-			}
-			
-			
+				if(node.getSubTreeAtIndex(i)!=null)
+					writeTreeToDisk(dos,node.getSubTreeAtIndex(i),offset);
+			}			
 		}
-		else
-		{
-			for(int i = 0; i < maxDegree; i++)
-			{
-				dos.writeLong(0);
-				
-			}
-			for(int i = 0; i <= maxDegree; i++)
-			{
-				dos.writeBoolean(false);
-				dos.writeLong(0);
-			}
-			
-			dos.writeInt(256);
-		}
-		
 	}
 	
 	/**

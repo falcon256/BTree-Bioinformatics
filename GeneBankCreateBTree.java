@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 
 
@@ -47,8 +48,11 @@ public class GeneBankCreateBTree {
 		withCache = (Integer.parseInt(args[0])==1)?true:false;
 		degree = Integer.parseInt(args[1]);
 		try {
+			
 			filePath=args[2];
+			
 			file = new File(filePath);
+			//bTreeFile = new RandomAccessFile(file,"rw");
 			//fileStream = new FileInputStream(file);
 			fileReader = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
