@@ -445,7 +445,7 @@ public class BTree<T> {
 			parent.setSubTreeAtIndex(newNode, offset+1);
 			node.setKeyAtIndex(-1l, minDegree);
 			node.setValueAtIndex(null, minDegree);
-			node.setSubTreeAtIndex(null, minDegree);//make sure this is right.
+			//node.setSubTreeAtIndex(null, minDegree);//make sure this is right.
 			newNode.setParentNode(parent);
 			newNode.setParentIndex(offset);
 			parent.setSize(parent.getSize()+1);
@@ -516,7 +516,7 @@ public class BTree<T> {
 			newNode.setParentIndex(offset);
 			node.setKeyAtIndex(-1l, minDegree);
 			node.setValueAtIndex(null, minDegree);
-			node.setSubTreeAtIndex(null, minDegree);//TODO make sure this is right
+			//node.setSubTreeAtIndex(null, minDegree);//TODO make sure this is right
 			parent.setSize(parent.getSize()+1);
 			node.setSize(node.getSize()-1);
 			
