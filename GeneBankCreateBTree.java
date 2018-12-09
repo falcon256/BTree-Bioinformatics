@@ -112,7 +112,7 @@ public class GeneBankCreateBTree {
 			inLine = fileReader.readLine();//skip the ORIGIN line before processing.
 			String batch = "";
 			int offset = 0;
-			while(!inLine.contains("//"))
+			while(inLine!=null&&!inLine.contains("//"))
 			{
 				
 				if(offset>=inLine.length())

@@ -252,12 +252,19 @@ public class BTree<T> {
 			parent.setKeyAtIndex(midKey, offset);
 			parent.setValueAtIndex(node.getValueAtIndex(minDegree), offset);
 			parent.setSubTreeAtIndex(newNode, offset+1);
+			node.setKeyAtIndex(-1l, minDegree);
+			node.setValueAtIndex(null, minDegree);
+			node.setSubTreeAtIndex(null, minDegree);
 			newNode.setParentNode(parent);
 			newNode.setParentIndex(offset);
 			parent.setSize(parent.getSize()+1);
 			node.setSize(node.getSize()-1);
 			if(verbose)
 				System.out.print(parent);
+			if(checkNodeSizing(node))
+				System.err.println("Node size/element mismatch");
+			if(checkNodeSizing(newNode))
+				System.err.println("Node size/element mismatch");
 			checkForSplit(parent);
 		}
 		else
@@ -347,7 +354,8 @@ public class BTree<T> {
 		dos.writeInt(maxDegree);
 		dos.writeInt(seql);
 		writeTreeToDisk(dos, this.root, 8);
-		
+		dos.flush();
+		dos.close();
 	}
 	
 	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
