@@ -40,7 +40,16 @@ public class BTreeNode<T> {
 			e.printStackTrace();
 		}
 		
-		
+		//proper init, probably not needed, but is correct.
+		for(int i = 0; i < degree; i++)
+		{
+			keys[i]=-1;
+			values[i]=null;
+		}
+		for(int i = 0; i <= degree; i++)
+		{
+			subTrees[i]=null;
+		}
 	}
 	
 	/**
@@ -211,10 +220,12 @@ public class BTreeNode<T> {
 	public String toString()
 	{
 		String s = "";
+		s+="Node: Size: "+this.getSize()+"\nKeys: ";
 		for(int i = 0; i <keys.length; i++)
 			s+=getKeyAtIndex(i)+ " ";
+		s+="\nSubtrees: ";
 		for(int i = 0; i <subTrees.length; i++)
-			s+=getSubTreeAtIndex(i);
+			s+=""+(null!=getSubTreeAtIndex(i)?true:false)+' ';	
 		return s;
 	}
     
