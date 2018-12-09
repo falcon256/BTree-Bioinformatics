@@ -14,6 +14,7 @@ public class BTree<T> {
 	
 	public BTree(int degree){
 		maxDegree = degree;
+		minDegree = degree/2;
 		create();
 	}
 	
@@ -25,6 +26,7 @@ public class BTree<T> {
 	public void create(){
 		if(verbose)System.out.println("Create called.");
 		BTreeNode<T> x = new BTreeNode<T>(maxDegree);
+		x.setIsRoot(true);
 		x.setIsLeaf(true);
 		x.setSize(0);
 		//DiskWrite(x);
@@ -64,50 +66,68 @@ public class BTree<T> {
 		BTreeNode<T> spot = InsertSearch(root,key);
 		//figure out if we need to shift.
 		int offset = 0;
-		while(offset<maxDegree&&root.getValueAtIndex(offset)!=null&&root.getKeyAtIndex(offset)<key)
+		while(offset<maxDegree&&spot.getValueAtIndex(offset)!=null&&spot.getKeyAtIndex(offset)<key)
 		{
 			offset++;
 		}
-		if(root.getValueAtIndex(offset)==null)//it is empty, no need to shift.
+		if(spot.getValueAtIndex(offset)==null)//it is empty, no need to shift.
 		{
 			if(verbose)
-				System.out.println("Inserting " + key + "without shift.");
+				System.out.println("Inserting " + key + " without shift.");
 			spot.setKeyAtIndex(key, offset);
 			spot.setValueAtIndex(obj, offset);
+			spot.setSize(spot.getSize()+1);
 			return;
 		}
 		
 		if(verbose)//debug output
 		{
-			for(int i = 0; i <maxDegree; i++)
-				System.out.print(spot.getKeyAtIndex(i)+ " ");
-			for(int i = 0; i <=maxDegree; i++)
-				System.out.print(spot.getSubTreeAtIndex(i));
+			System.out.println(spot.toString());		
 		}
 		
 
 		//going to need to shift right.
-		for(int i = maxDegree; i > offset; i--)
+		for(int i = maxDegree-1; i > offset; i--)
 		{
 			spot.setKeyAtIndex(spot.getKeyAtIndex(i-1), i);
 			spot.setValueAtIndex(spot.getValueAtIndex(i-1), i);
 			spot.setSubTreeAtIndex(spot.getSubTreeAtIndex(i), i+1);
 		}
+		spot.setKeyAtIndex(-1l, offset);
+		spot.setValueAtIndex(null, offset);
+		spot.setSubTreeAtIndex(null, offset);
 		
 		if(verbose)//debug output
 		{
-			for(int i = 0; i <maxDegree; i++)
-				System.out.print(spot.getKeyAtIndex(i)+ " ");
-			for(int i = 0; i <=maxDegree; i++)
-				System.out.print(spot.getSubTreeAtIndex(i));
+			System.out.println(spot.toString());		
 		}
 		
 		if(verbose)
-			System.out.println("Inserting " + key + "after shifting.");
-
+			System.out.println("Inserting " + key + " after shifting.");
+		
 		spot.setKeyAtIndex(key, offset);
 		spot.setValueAtIndex(obj, offset);
+		spot.setSize(spot.getSize()+1);
+		
+		if(verbose)//debug output
+		{
+			System.out.println(spot.toString());		
+		}
+		if(spot.getSize()==maxDegree-1)
+		{
+			if(verbose)
+			{
+				System.out.println("Need to split node.\n"+spot.toString());					
+			}
+			splitNode(spot);
+			if(verbose)
+			{
+				System.out.println("Split.\n"+spot.toString());					
+			}
+		}
 	}
+	
+	
 	
 	/**
 	 * 
@@ -115,46 +135,75 @@ public class BTree<T> {
 	 * @param key
 	 * @return
 	 */
-	private BTreeNode<T> InsertSearch(BTreeNode<T> root, long key)
+	private BTreeNode<T> InsertSearch(BTreeNode<T> start, long key)
 	{
-		if(root.getIsleaf())
-		{
+		if(start.getIsleaf())
+		{	
 			int offset = 0;
-			while(offset<maxDegree&&root.getValueAtIndex(offset)!=null&&root.getKeyAtIndex(offset)<key)
+			while(offset<maxDegree-1&&start.getValueAtIndex(offset)!=null&&start.getKeyAtIndex(offset)<key)
 			{
 				offset++;
 			}
-			//TODO
-			if(offset>=maxDegree)
-			{
-				if(verbose)
-				{
-					System.out.println("Need to split node.");
-					for(int i = 0; i <maxDegree; i++)
-						System.out.print(root.getKeyAtIndex(i)+ " ");
-					for(int i = 0; i <=maxDegree; i++)
-						System.out.print(root.getSubTreeAtIndex(i));
-				}
-				//split(root);
-			}
-			return root;
+			//TODO check if this is needed.
+			return start;
 		}
 		//not leaf
 		int offset = 0;
-		while(offset<maxDegree&&root.getValueAtIndex(offset)!=null&&root.getKeyAtIndex(offset)<key)
+		while(offset<maxDegree&&start.getValueAtIndex(offset)!=null&&start.getKeyAtIndex(offset)<key)
 		{
 			offset++;
 		}
 		if(offset>=maxDegree)
 			if(verbose)
 				System.out.println("Something went wrong in InsertSearch, maxDegree was passed.");
-		if(root.getSubTreeAtIndex(offset)!=null)
-			return InsertSearch(root.getSubTreeAtIndex(offset), key);
+		if(start.getSubTreeAtIndex(offset)!=null)
+			return InsertSearch(start.getSubTreeAtIndex(offset), key);
 		else
 			if(verbose)
 				System.out.println("Something went wrong in InsertSearch, no leaf where this should be inserted.");
 		return null;
 	}
+	
+	public void splitNode(BTreeNode<T> node)
+	{
+		if(node.getIsRoot())
+		{
+			BTreeNode<T> newRoot = new BTreeNode<T>(maxDegree);
+			BTreeNode<T> newNode = new BTreeNode<T>(maxDegree);
+			long midKey = node.getKeyAtIndex(minDegree);
+			newRoot.setKeyAtIndex(midKey, 0);
+			newRoot.setValueAtIndex(node.getValueAtIndex(minDegree), 0);
+			newRoot.setSubTreeAtIndex(node, 0);
+			newRoot.setSubTreeAtIndex(newNode, 1);
+			newNode.setParentNode(newRoot);
+			newNode.setParentIndex(1);
+			node.setParentNode(newRoot);
+			node.setParentIndex(0);
+			node.setKeyAtIndex(-1l, minDegree);
+			node.setValueAtIndex(null, minDegree);
+			for(int i = minDegree+1; i < maxDegree; i++)
+			{
+				newNode.setKeyAtIndex(node.getKeyAtIndex(i),i-minDegree);
+				newNode.setValueAtIndex(node.getValueAtIndex(i), i-minDegree);
+				node.setKeyAtIndex(-1l, i);
+				node.setValueAtIndex(null, i);
+				newNode.setSize(newNode.getSize()+1);
+				node.setSize(node.getSize()-1);
+			}
+			for(int i = minDegree+1; i <= maxDegree; i++)
+			{
+				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree);
+				node.setSubTreeAtIndex(null, i);
+			}
+			newRoot.setIsRoot(true);
+			newRoot.setIsLeaf(false);
+			node.setIsRoot(false);
+			newNode.setIsRoot(false);
+			this.root = newRoot;
+		}
+	}
+	
+	
 	/**
 	 * 
 	 */
@@ -431,5 +480,8 @@ public class BTree<T> {
 	{
 		return null;//TODO
 	}
+
+	
+	
 
 }

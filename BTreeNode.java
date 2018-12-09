@@ -207,19 +207,16 @@ public class BTreeNode<T> {
 		return false;//TODO
 	}
 	
-	@Override
-    public String toString(){
-        String s = new String();
-        s += "keys: ";
-        for (int i = 0; i < keys.length; i++)
-        {
-            s += (keys[i] + " ");
-        }
-        s += "\nchildren: ";
-        for (int i = 0; i < values.length; i++)
-        {
-            s += (values[i].toString() + " ");
-        }
-        return s;
-    }
+	@Override   
+	public String toString()
+	{
+		String s = "";
+		for(int i = 0; i <keys.length; i++)
+			s+=getKeyAtIndex(i)+ " ";
+		for(int i = 0; i <subTrees.length; i++)
+			s+=getSubTreeAtIndex(i);
+		return s;
+	}
+    
+    
 }
