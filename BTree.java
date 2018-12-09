@@ -360,14 +360,17 @@ public class BTree<T> {
 	
 	public void writeTreeToDisk(DataOutputStream dos, BTreeNode<T> node, long offset) throws IOException
 	{
-		int size = 17*maxDegree;//17 bytes
+		int size = 8*maxDegree + 9*(maxDegree+1);//8 bytes per key, 9 bytes per possible link.
 		if(node!=null)
 		{
 			
 			for(int i = 0; i < maxDegree; i++)
 			{
-				dos.writeBoolean(node.getValueAtIndex(i)==null?false:true);//writes one byte, true if it has a child here.
 				dos.writeLong(node.getKeyAtIndex(i));//writes 8 bytes, keys and values are the same for this system.
+			}
+			for(int i = 0; i < maxDegree; i++)
+			{
+				dos.writeBoolean(node.getValueAtIndex(i)==null?false:true);//writes one byte, true if it has a child here.
 				dos.writeLong(offset + i*size);//the offset of our next child node object.
 			}
 			for(int i = 0; i <= maxDegree; i++)
