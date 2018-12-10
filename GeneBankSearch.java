@@ -147,11 +147,26 @@ public class GeneBankSearch {
 		//System.out.println("Alignment sanity check 256="+sanity);
 		//System.out.println(bTreeFile.getFilePointer());
 		int test = 0;
-		
-		
+		//System.out.println("target="+key);
+		//for(int i = 0; i < degree; i++)
+		//	System.out.println(keys[i]+" ");
+		//System.out.println(key);		
 		while(test<degree&&keys[test]<key&&hasKeys[test])
-			test++;
+		{
+			//System.out.println(keys[test]/1000 + " < " + key/1000);
+			test++;		
+		}
+		//System.out.println("Selected" + keys[test]);
 		
+		//this helps visualize the path a lot.
+		/*
+		if(verbose)
+		{
+			if(test>0)
+				System.out.println(keys[test-1]+ "<" + key + "<" + keys[test]);
+			else
+				System.out.println(key + "<" + keys[test]);
+		}*/
 		
 		
 		if(offsets[test]==offset)
@@ -162,16 +177,37 @@ public class GeneBankSearch {
 		}
 		if(offsets[test]<=0&&hasSubTrees[test]||offsets[test+1]<=0&&hasSubTrees[test+1])
 			System.err.println("A NEGATIVE offset value? That's problematic.");
+		
+		/*
+		if(test==0&&hasSubTrees[0])
+			count+= query(key, offsets[0]);
+		else if(test==degree-1&&hasSubTrees[degree])
+			count+= query(key, offsets[degree]);
+		else if(hasSubTrees[test-1])
+			count+= query(key, offsets[test-1]);
+		*/
+		
+		//latest try
+		/*
+		if(key<=keys[test]||keys[test]==-1l&&hasSubTrees[test])
+			count+= query(key, offsets[test]);
+		else if(key>=keys[test]&&hasSubTrees[test+1])
+			count+= query(key, offsets[test+1]);
+		*/
 		/*
 		if(test>0&&hasSubTrees[test-1])
 			count+= query(key, offsets[test-1]);
+		
 		if(hasSubTrees[test])
 			count+= query(key, offsets[test]);
+			*/
+		/*
 		if(hasSubTrees[test+1])
 			count+= query(key, offsets[test+1]);
 		*/
-		// temp code to make sure things exist in the tree
 		
+		
+		// temp code to make sure things exist in the tree		
 		
 		for(int i = 0; i <= degree; i++)
 		{

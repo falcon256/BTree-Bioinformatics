@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 
@@ -95,8 +97,7 @@ public class GeneBankCreateBTree {
 		//get ready to start writing.
 		try {
 			
-			//TODO write metadata.
-			
+			ArrayList<Long> testArrayList = new ArrayList<Long>();
 			
 			
 			if(verbosity>0)
@@ -137,19 +138,26 @@ public class GeneBankCreateBTree {
 				if(batch.length()>=sequenceLength)
 				{
 					long key = TreeObject.encode(batch);
-					TreeObject t = new TreeObject(key);
-					bt.insert(t, key);
+					//TreeObject t = new TreeObject(key);
+					//bt.insert(t, key);
+					testArrayList.add(key);
 					if(verbosity>0)
 						System.out.println(batch+" Read as key "+key+" which decodes to "+TreeObject.decode(key));
 					
 					
 					count++;
-					batch = batch.substring(1);//this is right
+					batch = batch.substring(1);//this is right//temp removed to lower output size for debugging.
 					//batch = "";
 					
 				}
 				offset++;
 			}
+			}
+			Collections.sort(testArrayList);
+			for(int i = 0; i < testArrayList.size(); i++)
+			{
+				TreeObject t = new TreeObject(testArrayList.get(i));
+				bt.insert(t, testArrayList.get(i));
 			}
 			
 			
@@ -160,7 +168,7 @@ public class GeneBankCreateBTree {
 			//and we are done.
 			//file.close();
 			
-			if(verbosity>0)
+			//if(verbosity>0)
 				System.out.println("Number of items loaded: "+count);
 			
 		} catch (IOException e) {
