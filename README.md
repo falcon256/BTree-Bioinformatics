@@ -1,22 +1,29 @@
 ****************
-* Project number/name: B-Trees
+* Project name: B-Trees
 * Class: CS 321 Fall 2018
 * Date: 9 December, 2018 
-* Your name: Daniel Lambert, Golam Md Mortuza
+* Author: Daniel Lambert, Golam Md Mortuza
 **************** 
 
 OVERVIEW:
 
+----------------------------------------------------------------------------
+
  Implement a B-Tree Abtract Data Type (ADT).
+
  Create programs that uses a B-Tree to process and store bioinformatics information.
+
  Create a (UML) diagram to describe the relationship of classes of bioinformatics program.
+
  Create and implement a test plan for the programs.
 
 
 INCLUDED FILES:
- 
- ICache.java: Interface for Cache.
 
+---------------------------------------------------------------------------- 
+
+ ICache.java: Interface for Cache.
+ 
  Cache.java: Cache for BTree.
 
  DLLNode.java: Double Linked List for java
@@ -36,9 +43,12 @@ INCLUDED FILES:
 
 COMPILING AND RUNNING:
 
+----------------------------------------------------------------------------
+
  Compile:
 
   ```$ javac *.java```
+
  Run:
 
  GeneBankCreateBTree.java:
@@ -57,6 +67,7 @@ COMPILING AND RUNNING:
 	The program writes a text file named dump, that has the following line format: [frequency] [DNA string]. The dump file contains frequency and DNA string in an in-order traversal.
 
  GeneBankSearch.java:
+
   ```$ java GeneBankSearch [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]```
 
   The debug level for GeneBankSearch support the following:
@@ -67,6 +78,8 @@ COMPILING AND RUNNING:
 
 
 PROGRAM DESIGN AND IMPORTANT CONCEPTS:
+
+----------------------------------------------------------------------------
 
  Bioinformatics is the field of science in which biology, computer science, and information technology merge to form a single discipline. One of the primary aims of bioinformatics is to attempt to determine the structure and meaning of the human genome. The human genome is a complete set of human DNA. The Human Genome project was started in 1990 by the United States Department of Energy and the U.S. National Institutes of Health. By April 14, 2003 99% of the Human Genome had been sequenced with 99.9% accuracy.
 
@@ -83,9 +96,13 @@ PROGRAM DESIGN AND IMPORTANT CONCEPTS:
 
 TESTING:
 
+----------------------------------------------------------------------------
+
  We are still working the testing of our program.
 
 DISCUSSION:
+
+----------------------------------------------------------------------------
 
  BTree is widely used self-brancing tree data structure that maintains sorted data and allows searches, sequential access, insertions, and deletions in logarithmic time. Bioinformatics has become an important part of many areas of biology and computer science. This project combine two most popular thing of Biology and computer science. This project help us visualize how the BTree works and how computer science can be connected with biology. The main problem of this project was it's complexity. During implementing the project this very complext that it was hard to debug. And it was hard to know what was going wrong.
 
