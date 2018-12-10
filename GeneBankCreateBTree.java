@@ -80,6 +80,7 @@ public class GeneBankCreateBTree {
 			setupFailed = true;
 			return;
 		}
+		
 
 	}
 	
@@ -138,13 +139,13 @@ public class GeneBankCreateBTree {
 					long key = TreeObject.encode(batch);
 					TreeObject t = new TreeObject(key);
 					bt.insert(t, key);
-					//if(verbosity>0)
-					//	System.out.println(batch+" Read as key "+key+" which decodes to "+TreeObject.decode(key));
+					if(verbosity>0)
+						System.out.println(batch+" Read as key "+key+" which decodes to "+TreeObject.decode(key));
 					
 					
 					count++;
-					//batch = batch.substring(1);//this is right
-					batch = "";
+					batch = batch.substring(1);//this is right
+					//batch = "";
 					
 				}
 				offset++;
