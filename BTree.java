@@ -20,7 +20,7 @@ public class BTree<T> {
 	private int maxDegree;
 	private boolean verbose = false;
 	private int itemsWritten = 0;
-	private int nodeSize = 81;//8*maxDegree + 9*(maxDegree+1) + 4;//8 bytes per key, 9 bytes per possible link. +4 alignment sanity check for testing
+	private int nodeSize = 0;
 	public BTree(int degree){
 		maxDegree = degree;
 		minDegree = degree/2;
@@ -651,7 +651,7 @@ public class BTree<T> {
 		//dos.writeInt(seql);
 		bTreeFile.writeInt(maxDegree);
 		bTreeFile.writeInt(seql);
-		bTreeFile.writeLong(16+this.root.getUID()*nodeSize);
+		bTreeFile.writeLong(16);
 		//writeTreeToDisk(dos, this.root, 8);
 		writeTreeToDisk(bTreeFile, this.root, 16);
 		//dos.flush();
@@ -723,17 +723,23 @@ public class BTree<T> {
 	}
 	
 	public void writeTreeToDisk(RandomAccessFile dos, BTreeNode<T> node, long offset) throws IOException
-	{		
-		int size = nodeSize;
-		dos.seek(offset+size*node.getUID());
+	{	
+		//8*maxDegree + 9*(maxDegree+1) + 4;//8 bytes per key, 9 bytes per possible link. +4 alignment sanity check for testing
+		this.nodeSize = 9*maxDegree + 9*(maxDegree+1) + 4;
+		
+		//int size = nodeSize;
+		dos.seek(offset+nodeSize*node.getUID());
+		long start = dos.getFilePointer();
+		//System.out.println("Current file pointer:" + dos.getFilePointer());
 		if(node!=null)
 		{			
 			for(int i = 0; i < maxDegree; i++)
 			{
+				dos.writeBoolean(node.getValueAtIndex(i)!=null);//writes out if it has a key or not.
 				dos.writeLong(node.getKeyAtIndex(i));//writes 8 bytes, keys and values are the same for this system.
 				if(verbose&&node.getValueAtIndex(i)!=null)
 				{
-					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written at :"+(offset+size*node.getUID())+". "+ ++itemsWritten+" total");
+					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written at :"+(offset+nodeSize*node.getUID())+". "+ ++itemsWritten+" total");
 				}
 			}
 			for(int i = 0; i <= maxDegree; i++)
@@ -741,7 +747,7 @@ public class BTree<T> {
 				if(node.getSubTreeAtIndex(i)!=null)
 				{
 					dos.writeBoolean(true);//writes one byte, true if it has a child here.
-					dos.writeLong(offset+size*node.getSubTreeAtIndex(i).getUID());//the offset of our next child node object.
+					dos.writeLong(offset+nodeSize*node.getSubTreeAtIndex(i).getUID());//the offset of our next child node object.
 				}
 				else
 				{
@@ -750,11 +756,22 @@ public class BTree<T> {
 				}
 			}
 			dos.writeInt(256);
+			
+			long end = dos.getFilePointer();
+			long length = end-start;
+			//System.out.println(length + " length of node on disk vs actual size " + nodeSize);
 			if(verbose)
 				System.out.println("Current file pointer:" + dos.getFilePointer());
-			if(node.getIsRoot())
-				if(verbose)
-					System.out.println("***Root written at "+(offset+size*node.getUID())+"***");
+			if(node==this.root)
+			{
+				long curpos = dos.getFilePointer();
+				dos.seek(8);
+				dos.writeLong(start);
+				dos.seek(curpos);
+				//if(verbose)
+				System.out.println("***Root written at "+(offset+nodeSize*node.getUID())+"***");
+			}
+				
 			
 			
 			

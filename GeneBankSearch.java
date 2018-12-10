@@ -105,6 +105,7 @@ public class GeneBankSearch {
 			System.out.println(count);
 			
 			System.out.println(totalRead+" keys checked.");
+			totalRead=0;
 		}
 		
 	}
@@ -114,18 +115,26 @@ public class GeneBankSearch {
 	{
 		bTreeFile.seek(offset);
 		int count = 0;
+		boolean[] hasKeys = new boolean[degree];
 		long[] keys = new long[degree];
 		boolean[] hasSubTrees = new boolean[degree+1];
 		long[] offsets = new long[degree+1];
 		
 		for(int i = 0; i < degree; i++)
 		{
+			hasKeys[i]=bTreeFile.readBoolean();
 			keys[i]=bTreeFile.readLong();
-			totalRead++;
-			if(keys[i]==key)
-				count++;
-			//if(verbose&&keys[i]!=0l&&keys[i]!=-1l)
+			if(keys[i]!=0l&&keys[i]!=-1l)
+			{
+				totalRead++;
 			//	System.out.println(TreeObject.decode(keys[i]));
+			}
+			if(keys[i]==key)
+			{
+				count++;
+				//if(verbose&&keys[i]!=0l&&keys[i]!=-1l)
+				//	System.out.println(TreeObject.decode(keys[i]));
+			}
 		}
 		for(int i = 0; i <= degree; i++)
 		{
@@ -138,8 +147,13 @@ public class GeneBankSearch {
 		//System.out.println("Alignment sanity check 256="+sanity);
 		//System.out.println(bTreeFile.getFilePointer());
 		int test = 0;
-		while(test<degree&&keys[test]>key)
+		
+		
+		while(test<degree&&keys[test]<key&&hasKeys[test])
 			test++;
+		
+		
+		
 		if(offsets[test]==offset)
 		{
 			System.err.println("This node is referencing itself as a child!");
@@ -148,22 +162,22 @@ public class GeneBankSearch {
 		}
 		if(offsets[test]<=0&&hasSubTrees[test]||offsets[test+1]<=0&&hasSubTrees[test+1])
 			System.err.println("A NEGATIVE offset value? That's problematic.");
-		
+		/*
 		if(test>0&&hasSubTrees[test-1])
 			count+= query(key, offsets[test-1]);
 		if(hasSubTrees[test])
 			count+= query(key, offsets[test]);
 		if(hasSubTrees[test+1])
 			count+= query(key, offsets[test+1]);
-		
+		*/
 		// temp code to make sure things exist in the tree
 		
-		/*
+		
 		for(int i = 0; i <= degree; i++)
 		{
 			if(hasSubTrees[i])
 				count+= query(key, offsets[i]);
-		}*/
+		}
 		
 		
 		return count;
