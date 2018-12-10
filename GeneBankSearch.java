@@ -43,7 +43,7 @@ public class GeneBankSearch {
 		if(args.length<4)
 		{
 			System.err.println("Insufficient number of arguements.");
-			System.out.println("Args: [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]");
+			System.err.println("Args: [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]");
 			return;
 		}
 		try {
@@ -56,7 +56,7 @@ public class GeneBankSearch {
 		if(bTreeFile==null)
 		{
 			System.err.println("Bad file path given in paremeter 1.");
-			System.out.println("Args: [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]");
+			System.err.println("Args: [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]");
 			setupFailed = true;
 			return;
 		}
@@ -64,7 +64,7 @@ public class GeneBankSearch {
 		if(qFileReader==null)
 		{
 			System.err.println("Bad file path given in paremeter 2.");
-			System.out.println("Args: [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]");
+			System.err.println("Args: [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]");
 			setupFailed = true;
 			return;
 		}
@@ -89,7 +89,8 @@ public class GeneBankSearch {
 		degree = bTreeFile.readInt();
 		sequenceLength = bTreeFile.readInt();
 		long startPoint = bTreeFile.readLong();
-		System.out.println("Root at: "+startPoint);
+		if(verbose)
+			System.err.println("Root at: "+startPoint);
 		//System.out.println(""+bTreeFile.readBoolean() + TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong())+" "+TreeObject.decode(bTreeFile.readLong()));
 		//TODO iterate over the query and get our output data.
 		boolean done = false;
@@ -98,13 +99,14 @@ public class GeneBankSearch {
 			String queryString = qFileReader.readLine();
 			if(queryString==null)
 				break;
-			System.out.println("Looking for "+queryString);
+			if(verbose)
+				System.err.println("Looking for "+queryString);
 			long queryKey = TreeObject.encode(queryString);
 			int count = query(queryKey, startPoint);
 			
 			System.out.println(count);
-			
-			System.out.println(totalRead+" keys checked.");
+			if(verbose)
+				System.err.println(totalRead+" keys checked.");
 			totalRead=0;
 		}
 		

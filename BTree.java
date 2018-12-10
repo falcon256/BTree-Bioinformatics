@@ -1,8 +1,4 @@
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
@@ -20,6 +16,7 @@ public class BTree<T> {
 	private int minDegree;
 	private int maxDegree;
 	private boolean verbose = false;
+	private boolean writeDump = false;
 	private int itemsWritten = 0;
 	private int nodeSize = 0;
 	public BTree(int degree){
@@ -30,11 +27,11 @@ public class BTree<T> {
 	
 	public BTree(int degree,boolean verb){
 		this(degree);
-		verbose = verb;
+		writeDump = verb;
 	}
 	
 	public void create(){
-		if(verbose)System.out.println("Create called.");
+		if(verbose)System.err.println("Create called.");
 		BTreeNode<T> x = new BTreeNode<T>(maxDegree);
 		x.setIsRoot(true);
 		x.setIsLeaf(true);
@@ -75,12 +72,11 @@ public class BTree<T> {
 	public void insert(T obj, long key) {
 		
 		//test code
-		boolean good = subTreeOrderCheckerGreater(root , 0);//check the ordering before inserting.
-		good = subTreeOrderCheckerLesser(root , Long.MAX_VALUE);
+		//boolean good = subTreeOrderCheckerGreater(root , 0);//check the ordering before inserting.
+		//good = subTreeOrderCheckerLesser(root , Long.MAX_VALUE);
 		
 		BTreeNode<T> spot = InsertSearch(this.root,key);
 		//figure out if we need to shift.
-		checkForSplit(spot);
 		int offset = 0;
 		while(offset<maxDegree&&spot.getValueAtIndex(offset)!=null&&spot.getKeyAtIndex(offset)<key)
 		{
@@ -89,7 +85,7 @@ public class BTree<T> {
 		if(spot.getValueAtIndex(offset)==null)//it is empty, no need to shift.
 		{
 			if(verbose)
-				System.out.println("Inserting " + key + " without shift. New size: "+(spot.getSize()+1));
+				System.err.println("Inserting " + key + " without shift. New size: "+(spot.getSize()+1));
 			spot.setKeyAtIndex(key, offset);
 			spot.setValueAtIndex(obj, offset);
 			spot.setSize(spot.getSize()+1);
@@ -98,16 +94,20 @@ public class BTree<T> {
 					System.err.println("Out of order keys detected in "+spot);
 			checkForSplit(spot);
 			if(verbose)
-				System.out.println("Total items"+countItems(root, 0));
+				System.err.println("Total items"+countItems(root, 0));
 			if(verbose)
 				if(!checkKeyOrdering(spot))
 					System.err.println("Out of order keys detected in "+spot);
+			
+
+			//printTree(root,0);
+			//int debug = 0;
 			return;
 		}
 		/*
 		if(verbose)//debug output
 		{
-			System.out.println(spot.toString());		
+			System.err.println(spot.toString());		
 		}
 		*/
 
@@ -120,22 +120,22 @@ public class BTree<T> {
 		/*
 		if(verbose)//debug output
 		{
-			System.out.println(spot.toString());		
+			System.err.println(spot.toString());		
 		}
 		*/
 		if(verbose)
-			System.out.println("Inserting " + key + " after shifting.");
+			System.err.println("Inserting " + key + " after shifting.");
 		
 		spot.setKeyAtIndex(key, offset);
 		spot.setValueAtIndex(obj, offset);
 		spot.setSize(spot.getSize()+1);
 		shiftElementsLeft(spot);
 		if(verbose)
-			System.out.println("Total items"+countItems(root, 0));
+			System.err.println("Total items"+countItems(root, 0));
 		checkForSplit(spot);
 		//if(verbose)
-			printTree(root,0);
-		int debug = 0;
+			//printTree(root,0);
+		//int debug = 0;
 	}
 	
 	private void checkForSplit(BTreeNode<T> spot)
@@ -146,17 +146,17 @@ public class BTree<T> {
 			int oldTreeCount = countSubtrees(this.root,0);
 			if(verbose)
 			{
-				//System.out.println("Need to split node.\n"+spot.toString());					
+				//System.err.println("Need to split node.\n"+spot.toString());					
 			}
 			splitNode(spot);
 			if(verbose)
 			{
-				//System.out.println("Split.\n"+spot.toString());					
+				//System.err.println("Split.\n"+spot.toString());					
 			}
 			if(verbose)
 			{
 			int newTreeCount = countSubtrees(this.root,0);
-			System.out.println(""+newTreeCount+" "+oldTreeCount);
+			System.err.println(""+newTreeCount+" "+oldTreeCount);
 			if(newTreeCount<=oldTreeCount)
 				System.err.println("Split isn't working correctly, didn't add a new tree.");
 			}
@@ -234,9 +234,9 @@ public class BTree<T> {
 		}
 		if(verbose)
 		{
-			System.out.println(""+keyCount+" "+newkeyCount);
-			System.out.println(""+valueCount+" "+newvalueCount);
-			System.out.println(""+subtreeCount+" "+newsubtreeCount);
+			System.err.println(""+keyCount+" "+newkeyCount);
+			System.err.println(""+valueCount+" "+newvalueCount);
+			System.err.println(""+subtreeCount+" "+newsubtreeCount);
 			if(keyCount!=newkeyCount||valueCount!=newvalueCount||subtreeCount!=newsubtreeCount)
 				System.err.println("shiftElementsLeft is destroying data.");
 			if(!checkKeyOrdering(node))
@@ -319,9 +319,9 @@ public class BTree<T> {
 		}
 		if(verbose)
 		{
-			System.out.println(""+keyCount+" "+newkeyCount);
-			System.out.println(""+valueCount+" "+newvalueCount);
-			System.out.println(""+subtreeCount+" "+newsubtreeCount);
+			System.err.println(""+keyCount+" "+newkeyCount);
+			System.err.println(""+valueCount+" "+newvalueCount);
+			System.err.println(""+subtreeCount+" "+newsubtreeCount);
 			if(keyCount!=newkeyCount||valueCount!=newvalueCount||subtreeCount!=newsubtreeCount)
 				System.err.println("shiftElementsLeft is destroying data.");
 			if(!checkKeyOrdering(node))
@@ -343,7 +343,9 @@ public class BTree<T> {
 		}
 		//not leaf
 		int offset = 0;
-		while(offset<maxDegree&&start.getValueAtIndex(offset)!=null&&start.getKeyAtIndex(offset)<key)
+		
+
+		while(offset<maxDegree&&start.getValueAtIndex(offset)!=null&&start.getKeyAtIndex(offset)<=key)
 		{
 			offset++;
 		}
@@ -354,20 +356,20 @@ public class BTree<T> {
 	
 	public void splitNode(BTreeNode<T> node)
 	{
-		if(!checkNodeOrderAt(node))
-			System.out.println(checkNodeOrderAt(node));
+		//if(!checkNodeOrderAt(node))
+		//	System.err.println(checkNodeOrderAt(node));
 		//debug code
-		int oldTreeCount = countSubtrees(this.root,0);
-		if(oldTreeCount==9)//an error is happening here, somewhere in this method.
-		{
-			int debug = 0;//breakpoint
-		}
+		//int oldTreeCount = countSubtrees(this.root,0);
+		//if(oldTreeCount==9)//an error is happening here, somewhere in this method.
+		//{
+		//	int debug = 0;//breakpoint
+		//}
 		
 		
 		if(node.getIsRoot())
 		{
 			if(verbose)
-				System.out.println("Splitnode splitting root");
+				System.err.println("Splitnode splitting root");
 			BTreeNode<T> newRoot = new BTreeNode<T>(maxDegree);
 			BTreeNode<T> newNode = new BTreeNode<T>(maxDegree);
 			long midKey = node.getKeyAtIndex(minDegree);
@@ -388,8 +390,8 @@ public class BTree<T> {
 			
 			if(verbose)
 			{
-				System.out.println("New Node: "+newNode);
-				System.out.println("New Node: "+node);
+				System.err.println("New Node: "+newNode);
+				System.err.println("New Node: "+node);
 			}
 			for(int i = minDegree+1; i < maxDegree; i++)
 			{
@@ -405,8 +407,8 @@ public class BTree<T> {
 			}
 			if(verbose)
 			{
-				System.out.println("New Node: "+newNode);
-				System.out.println("New Node: "+node);
+				System.err.println("New Node: "+newNode);
+				System.err.println("New Node: "+node);
 			}
 			for(int i = minDegree+1; i <= maxDegree; i++)
 			{
@@ -425,9 +427,9 @@ public class BTree<T> {
 			this.root = newRoot;
 			if(verbose)
 			{
-				System.out.println("New Root: "+newRoot);
-				System.out.println("Old Node: "+node);
-				System.out.println("New Node: "+newNode);
+				System.err.println("New Root: "+newRoot);
+				System.err.println("Old Node: "+node);
+				System.err.println("New Node: "+newNode);
 			
 				
 			if(checkNodeSizing(newRoot))
@@ -437,46 +439,25 @@ public class BTree<T> {
 			if(checkNodeSizing(newNode))
 				System.err.println("Node size/element mismatch");
 			}
-			if(verbose)
-			{
-				//debug code
-				int newTreeCount = countSubtrees(this.root,0);
-				System.out.println(""+newTreeCount+" "+oldTreeCount);
-				if(newTreeCount<=oldTreeCount)
-					System.err.println("Split failing at root.");
-			}
-			if(!checkNodeOrderAt(node))
-				System.out.println(checkNodeOrderAt(node));
-			if(!checkNodeOrderAt(newRoot))
-				System.out.println(checkNodeOrderAt(newRoot));
-			if(!checkNodeOrderAt(newNode))
-				System.out.println(checkNodeOrderAt(newNode));
 			
+
 			shiftElementsLeft(newRoot);
 			shiftElementsLeft(node);
 			shiftElementsLeft(newNode);
 			
 			
-			if(verbose)
-			{
-				//debug code
-				int newTreeCount = countSubtrees(this.root,0);
-				newTreeCount = countSubtrees(this.root,0);
-				System.out.println(""+newTreeCount+" "+oldTreeCount);
-				if(newTreeCount<=oldTreeCount)
-					System.err.println("Split failing at root after shiftelementsleft.");
-			}
+			
 			return;
 			
 		}
 		BTreeNode<T> newNode = new BTreeNode<T>(maxDegree);
 		if(node.getIsleaf()&&verbose)
 		{
-				System.out.println("Splitnode splitting leaf");
+				System.err.println("Splitnode splitting leaf");
 				newNode.setIsLeaf(true);
 		}
 		if(!node.getIsleaf()&&verbose)
-			System.out.println("Splitnode splitting non-root non-leaf node");
+			System.err.println("Splitnode splitting non-root non-leaf node");
 		
 		
 		long midKey = node.getKeyAtIndex(minDegree);
@@ -489,10 +470,10 @@ public class BTree<T> {
 		}
 		if(parent.getValueAtIndex(offset)==null)//it is empty, no need to shift.
 		{
-			//if(verbose)
-				System.out.println("Promoting " + midKey + " without shift. New size: "+(parent.getSize()+1));
 			if(verbose)
-				System.out.print(parent);
+				System.err.println("Promoting " + midKey + " without shift. New size: "+(parent.getSize()+1));
+			if(verbose)
+				System.err.print(parent);
 			parent.setKeyAtIndex(midKey, offset);
 			parent.setValueAtIndex(node.getValueAtIndex(minDegree), offset);
 			parent.setSubTreeAtIndex(newNode, offset+1);
@@ -505,7 +486,7 @@ public class BTree<T> {
 			node.setSize(node.getSize()-1);
 			if(verbose)
 			{
-				System.out.print(parent);
+				System.err.print(parent);
 				if(checkNodeSizing(node))
 					System.err.println("Node size/element mismatch");
 				if(checkNodeSizing(newNode))
@@ -525,54 +506,39 @@ public class BTree<T> {
 			}
 			if(verbose)
 			{
-				System.out.println("New Node: "+newNode);
-				System.out.println("New Node: "+node);
+				System.err.println("New Node: "+newNode);
+				System.err.println("New Node: "+node);
 			}
 			for(int i = minDegree+1; i <= maxDegree; i++)
 			{
 				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
 				node.setSubTreeAtIndex(null, i);
 			}
-			if(verbose)
-			{
-				//debug code
-				int newTreeCount = countSubtrees(this.root,0);
-				System.out.println(""+newTreeCount+" "+oldTreeCount);
-				if(newTreeCount<=oldTreeCount)
-					System.err.println("Split failing non-root with no shift.");
-			}
+			
 			
 			shiftElementsLeft(node);
 			shiftElementsLeft(newNode);	
 			shiftElementsLeft(parent);
 			
-			if(verbose)
-			{
-				//debug code
-				int newTreeCount = countSubtrees(this.root,0);
-				newTreeCount = countSubtrees(this.root,0);
-				System.out.println(""+newTreeCount+" "+oldTreeCount);
-				if(newTreeCount<=oldTreeCount)
-					System.err.println("Split failing non-root with no shift after shiftelelemtsleft.");
-			}
+			
 			checkForSplit(parent);
 			
 		}
 		else
 		{
-			//if(verbose)
-				System.out.println("Promoting " + midKey + " after shifting.");		//things break after this.
 			if(verbose)
-				System.out.print(parent);
+				System.err.println("Promoting " + midKey + " after shifting.");		//things break after this.
 			if(verbose)
-				System.out.print(node);
+				System.err.print(parent);
+			if(verbose)
+				System.err.print(node);
 			shiftElementsRight(parent,offset);
 			if(verbose)
-				System.out.println("\nP"+parent);
+				System.err.println("\nP"+parent);
 			if(verbose)
-				System.out.println(node);
+				System.err.println(node);
 			if(parent.getSubTreeAtIndex(offset)!=null)
-				System.out.println("Parent doesn't have open position for new node.");
+				System.err.println("Parent doesn't have open position for new node.");
 			parent.setKeyAtIndex(midKey, offset);
 			parent.setValueAtIndex(node.getValueAtIndex(minDegree), offset);
 			parent.setSubTreeAtIndex(newNode, offset);
@@ -585,9 +551,9 @@ public class BTree<T> {
 			node.setSize(node.getSize()-1);
 			
 			if(verbose)
-				System.out.println(parent);
+				System.err.println(parent);
 			if(verbose)
-				System.out.println(node);
+				System.err.println(node);
 			
 			
 			for(int i = minDegree+1; i < maxDegree; i++)
@@ -609,35 +575,20 @@ public class BTree<T> {
 				newNode.setSubTreeAtIndex(node.getSubTreeAtIndex(i), i-minDegree-1);
 				node.setSubTreeAtIndex(null, i);
 			}
-			if(verbose)
-			{
-			//debug code
-				int newTreeCount = countSubtrees(this.root,0);
-				System.out.println(""+newTreeCount+" "+oldTreeCount);
-				if(newTreeCount<=oldTreeCount)
-					System.err.println("Split failing at non-root with shift.");
-			}
+			
 			
 			shiftElementsLeft(node);
 			shiftElementsLeft(newNode);	
 			shiftElementsLeft(parent);
 			
-			if(verbose)
-			{
-			//debug code
-				int newTreeCount = countSubtrees(this.root,0);
-				newTreeCount = countSubtrees(this.root,0);
-				System.out.println(""+newTreeCount+" "+oldTreeCount);
-				if(newTreeCount<=oldTreeCount)
-					System.err.println("Split failing non-root with shift after shiftelelemtsleft.");
-			}
+			
 			
 			if(verbose)
-				System.out.println("Moved elements to new node.");
+				System.err.println("Moved elements to new node.");
 			if(verbose)
-				System.out.println(node);
+				System.err.println(node);
 			if(verbose)
-				System.out.println(newNode);
+				System.err.println(newNode);
 			checkForSplit(parent);
 			
 		}
@@ -668,7 +619,7 @@ public class BTree<T> {
 		bTreeFile.writeLong(16);
 		//writeTreeToDisk(dos, this.root, 8);
 		writeTreeToDisk(bTreeFile, this.root, 16);
-		printInOrder(this.root);
+		//printInOrder(this.root);
 		//dos.flush();
 		//dos.close();
 	}
@@ -718,18 +669,18 @@ public class BTree<T> {
 	public void printTree(BTreeNode<T> n, int count)
 	{
 		//if(verbose)
-			System.out.println("\nUID: "+n.getUID()+" Level: "+count+" Size: "+n.getSize()+" isRoot: "+n.getIsRoot()+" isLeaf: "+n.getIsleaf());//+" Parent: "+(n.getParentNode()!=null?n.getParentNode().getUID():"none"));
+			System.err.println("\nUID: "+n.getUID()+" Level: "+count+" Size: "+n.getSize()+" isRoot: "+n.getIsRoot()+" isLeaf: "+n.getIsleaf());//+" Parent: "+(n.getParentNode()!=null?n.getParentNode().getUID():"none"));
 		
 		for(int i = 0; i < maxDegree; i++)
 		{
-			//System.out.print(n.getValueAtIndex(i)!=null?n.getValueAtIndex(i)+" ":". ");
-			System.out.print(n.getValueAtIndex(i)!=null?n.getKeyAtIndex(i)+" ":". ");
+			//System.err.print(n.getValueAtIndex(i)!=null?n.getValueAtIndex(i)+" ":". ");
+			System.err.print(n.getValueAtIndex(i)!=null?n.getKeyAtIndex(i)+" ":". ");
 		}
-		System.out.println();
+		System.err.println();
 		for(int i = 0; i <= maxDegree; i++)
 		{
-			//System.out.print(n.getSubTreeAtIndex(i)!=null?n.getSubTreeAtIndex(i).getUID():". ");
-			System.out.print(n.getSubTreeAtIndex(i)!=null?this.getLowestInSubtree(n.getSubTreeAtIndex(i))+" ":". ");
+			//System.err.print(n.getSubTreeAtIndex(i)!=null?n.getSubTreeAtIndex(i).getUID():". ");
+			System.err.print(n.getSubTreeAtIndex(i)!=null?this.getLowestInSubtree(n.getSubTreeAtIndex(i))+" ":". ");
 		}
 
 		for(int i = 0; i <= maxDegree; i++)
@@ -748,7 +699,7 @@ public class BTree<T> {
 		//int size = nodeSize;
 		dos.seek(offset+nodeSize*node.getUID());
 		long start = dos.getFilePointer();
-		//System.out.println("Current file pointer:" + dos.getFilePointer());
+		//System.err.println("Current file pointer:" + dos.getFilePointer());
 		if(node!=null)
 		{			
 			for(int i = 0; i < maxDegree; i++)
@@ -756,9 +707,9 @@ public class BTree<T> {
 				dos.writeBoolean(node.getValueAtIndex(i)!=null);//writes out if it has a key or not.
 				dos.writeLong(node.getKeyAtIndex(i));//writes 8 bytes, keys and values are the same for this system.
 				if(node.getValueAtIndex(i)!=null)
-				//if(verbose&&node.getValueAtIndex(i)!=null)
+				if(verbose&&node.getValueAtIndex(i)!=null)
 				{
-					System.out.println(TreeObject.decode(node.getKeyAtIndex(i))+" written at :"+(offset+nodeSize*node.getUID())+". "+ ++itemsWritten+" total");
+					System.err.println(TreeObject.decode(node.getKeyAtIndex(i))+" written at :"+(offset+nodeSize*node.getUID())+". "+ ++itemsWritten+" total");
 				}
 			}
 			for(int i = 0; i <= maxDegree; i++)
@@ -778,9 +729,9 @@ public class BTree<T> {
 			
 			long end = dos.getFilePointer();
 			long length = end-start;
-			//System.out.println(length + " length of node on disk vs actual size " + nodeSize);
+			//System.err.println(length + " length of node on disk vs actual size " + nodeSize);
 			if(verbose)
-				System.out.println("Current file pointer:" + dos.getFilePointer());
+				System.err.println("Current file pointer:" + dos.getFilePointer());
 			if(node==this.root)
 			{
 				long curpos = dos.getFilePointer();
@@ -788,7 +739,7 @@ public class BTree<T> {
 				dos.writeLong(start);
 				dos.seek(curpos);
 				//if(verbose)
-				System.out.println("***Root written at "+(offset+nodeSize*node.getUID())+"***");
+				System.err.println("***Root written at "+(offset+nodeSize*node.getUID())+"***");
 			}
 				
 			
@@ -922,7 +873,7 @@ public class BTree<T> {
 			{
 				if(node.getValueAtIndex(i)!=null)
 				{
-					System.out.println(node.getKeyAtIndex(i));
+					System.err.println(node.getKeyAtIndex(i));
 				}
 			}
 			if(node.getSubTreeAtIndex(i)!=null)
@@ -983,12 +934,13 @@ public class BTree<T> {
 		}
 	}
 	*/
+	/*
 	private BTreeNode<T> getLeftSibling(BTreeNode<T> x) {
 		return null;
 	}
 	private BTreeNode<T> getRightSibling(BTreeNode<T> x) {
 		return null;
-	}
+	}*/
 
 	/**
 	 * actual recursive algo - see slide 23
@@ -1003,10 +955,11 @@ public class BTree<T> {
 	 * @param offset
 	 * @return
 	 */
+	/*
 	private long readAtOffset(int offset)
 	{
 		return 0;//TODO
-	}
+	}*/
 	
 	/**
 	 * 
@@ -1042,9 +995,10 @@ public class BTree<T> {
 	 * 
 	 * @param node
 	 */
+	/*
 	private void promoteNode(BTreeNode<T> node){
 		//TODO
-	}
+	}*/
 	
 	/**
 	 * 
@@ -1052,20 +1006,22 @@ public class BTree<T> {
 	 * @param child1
 	 * @param child2
 	 */
+	/*
 	private void mergeTwoNodes(BTreeNode<T> parent, BTreeNode<T> child1, BTreeNode<T> child2)
 	{
 		//TODO
-	}
+	}*/
 	
 	/**
 	 * 
 	 * @param node1
 	 * @param node2
 	 */
+	/*
 	private void mergeTwoNodes(BTreeNode<T> node1, BTreeNode<T> node2)
 	{
 		//TODO
-	}
+	}*/
 	
 
 	/**
@@ -1073,39 +1029,43 @@ public class BTree<T> {
 	 * @param x
 	 * @param k
 	 */
+	/*
 	private void RemoveKey(BTreeNode<T> x, T k)
 	{
 		//TODO
-	}
+	}*/
 	
 	/**
 	 * 
 	 * @param x
 	 * @param d
 	 */
+	/*
 	private void RemoveChild(BTreeNode<T> x, BTreeNode<T> d)
 	{
 		//TODO
-	}
+	}*/
 	
 	/**
 	 * 
 	 * @param tempKey
 	 * @param y
 	 */
+	/*
 	private void MoveKey(T tempKey, BTreeNode<T> y, BTreeNode<T> x)
 	{
 		//TODO
-	}
+	}*/
 	
 	/**
 	 * 
 	 * @param newRoot
 	 */
+	/*
 	private void MakeRoot(BTreeNode<T> newRoot)
 	{
 		//TODO
-	}
+	}*/
 	
 	/**
 	 * 
@@ -1113,10 +1073,11 @@ public class BTree<T> {
 	 * @param key
 	 * @return
 	 */
+	/*
 	private BTreeNode<T> FindChild(BTreeNode<T> root,T key)
 	{
 		return null;//TODO
-	}
+	}*/
 
 	
 	

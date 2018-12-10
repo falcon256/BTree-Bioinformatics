@@ -3,9 +3,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.Collections;
 
 
 
@@ -97,7 +94,7 @@ public class GeneBankCreateBTree {
 		//get ready to start writing.
 		try {
 			
-			ArrayList<Long> testArrayList = new ArrayList<Long>();
+			//ArrayList<Long> testArrayList = new ArrayList<Long>();
 			
 			
 			if(verbosity>0)
@@ -138,9 +135,9 @@ public class GeneBankCreateBTree {
 				if(batch.length()>=sequenceLength)
 				{
 					long key = TreeObject.encode(batch);
-					//TreeObject t = new TreeObject(key);
-					//bt.insert(t, key);
-					testArrayList.add(key);
+					TreeObject t = new TreeObject(key);
+					bt.insert(t, key);
+					//testArrayList.add(key);
 					if(verbosity>0)
 						System.out.println(batch+" Read as key "+key+" which decodes to "+TreeObject.decode(key));
 					
@@ -153,12 +150,16 @@ public class GeneBankCreateBTree {
 				offset++;
 			}
 			}
+			
+			//test code, bug isolation
+			/*
 			Collections.sort(testArrayList);
 			for(int i = 0; i < testArrayList.size(); i++)
 			{
 				TreeObject t = new TreeObject(testArrayList.get(i));
 				bt.insert(t, testArrayList.get(i));
 			}
+			*/
 			
 			
 			bt.writeToDisk(filePath+"btree.data."+sequenceLength+"."+degree,sequenceLength);
@@ -168,7 +169,7 @@ public class GeneBankCreateBTree {
 			//and we are done.
 			//file.close();
 			
-			//if(verbosity>0)
+			if(verbosity>0)
 				System.out.println("Number of items loaded: "+count);
 			
 		} catch (IOException e) {
@@ -183,9 +184,10 @@ public class GeneBankCreateBTree {
 	 * see 15-B-Trees slide 14
 	 * @return the optimal degree
 	 */
+	/*
 	private int calculateOptimalDegree()
 	{
 		return -1;//TODO
-	}
+	}*/
 
 }

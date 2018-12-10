@@ -150,6 +150,7 @@ public class Cache<T> implements ICache<T>{
  * Normally I wouldn't nest a class like this, but the p1 description prevented making it external.
  * @param <T> - generic type
  */
+	@SuppressWarnings("hiding")
 	private class ListDoubleLinked<T> {
 	
 		private DLLNode<T> head = null;
@@ -181,6 +182,7 @@ public class Cache<T> implements ICache<T>{
 		/**
 		 * @param element - element to add to the end of the list.
 		 */
+		/*
 		public void addLast(T element)
 		{
 			if(element==null)
@@ -198,7 +200,7 @@ public class Cache<T> implements ICache<T>{
 				tail = newNode;
 			}
 			count++;		
-		}
+		}*/
 		
 		/**
 		 * @return - removes and returns the first item in the list.
