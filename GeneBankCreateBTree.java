@@ -143,7 +143,7 @@ public class GeneBankCreateBTree {
 					
 					
 					count++;
-					batch = "";
+					batch = batch.substring(1);
 					
 				}
 				offset++;

@@ -13,7 +13,6 @@ public class BTreeNode<T> {
 	private boolean isRoot;
 	private static int uidCounter = 0;
 	private int uid = 0;
-	// size should probably be max+1 to allow merging then promoting.
 	private long[] keys = null;
 	private T[] values = null;
 	private BTreeNode<T>[] subTrees = null;

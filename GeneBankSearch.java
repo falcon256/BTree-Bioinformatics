@@ -148,18 +148,22 @@ public class GeneBankSearch {
 		}
 		if(offsets[test]<=0&&hasSubTrees[test]||offsets[test+1]<=0&&hasSubTrees[test+1])
 			System.err.println("A NEGATIVE offset value? That's problematic.");
-		//if(hasSubTrees[test])
-		//	count+= query(key, offsets[test]);
-		//if(hasSubTrees[test+1])
-		//	count+= query(key, offsets[test+1]);
+		
+		if(test>0&&hasSubTrees[test-1])
+			count+= query(key, offsets[test-1]);
+		if(hasSubTrees[test])
+			count+= query(key, offsets[test]);
+		if(hasSubTrees[test+1])
+			count+= query(key, offsets[test+1]);
 		
 		// temp code to make sure things exist in the tree
 		
+		/*
 		for(int i = 0; i <= degree; i++)
 		{
 			if(hasSubTrees[i])
 				count+= query(key, offsets[i]);
-		}
+		}*/
 		
 		
 		return count;
