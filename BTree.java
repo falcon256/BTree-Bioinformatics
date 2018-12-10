@@ -1,6 +1,9 @@
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.Writer;
 import java.lang.reflect.Array;
 
 //import BTree.BTreeNode;//Dan - this is implied if they are both in the default package, otherwise lets move everything into a btree package.
@@ -622,6 +625,13 @@ public class BTree<T> {
 		//printInOrder(this.root);
 		//dos.flush();
 		//dos.close();
+		if(this.writeDump)
+		{
+			BufferedWriter b = new BufferedWriter(new FileWriter(new File("dump")));
+			debugDumpInOrder(this.root, b);
+			b.flush();
+			b.close();
+		}
 	}
 	
 	public int countItems(BTreeNode<T> n, int count)
@@ -881,6 +891,22 @@ public class BTree<T> {
 		}
 	}
 	
+	public void debugDumpInOrder(BTreeNode<T> node, BufferedWriter b) throws IOException
+	{
+		for(int i = 0; i <= maxDegree; i++)
+		{
+			if(i<maxDegree)
+			{
+				if(node.getValueAtIndex(i)!=null)
+				{
+					//System.err.println(node.getKeyAtIndex(i));
+					b.write("1 "+node.getKeyAtIndex(i)+"\n");
+				}
+			}
+			if(node.getSubTreeAtIndex(i)!=null)
+				debugDumpInOrder(node.getSubTreeAtIndex(i),b);
+		}
+	}
 	/**
 	 * 
 	 */

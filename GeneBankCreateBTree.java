@@ -97,11 +97,11 @@ public class GeneBankCreateBTree {
 			//ArrayList<Long> testArrayList = new ArrayList<Long>();
 			
 			
-			if(verbosity>0)
+			if(verbosity>1)
 				System.out.println("Verbose mode selected\nFile "+filePath+" Loaded\nCache: "+withCache+" degree: "+degree+" Seq Len: "+sequenceLength+" Cache size: "+cacheSize);
 			
 			BTree<TreeObject> bt = new BTree<TreeObject>(degree,verbosity>0?true:false);
-			if(verbosity>0)
+			if(verbosity>1)
 				System.out.println("BTree created with degree: "+degree);
 			
 			//bring in the data.
@@ -138,7 +138,7 @@ public class GeneBankCreateBTree {
 					TreeObject t = new TreeObject(key);
 					bt.insert(t, key);
 					//testArrayList.add(key);
-					if(verbosity>0)
+					if(verbosity>1)
 						System.out.println(batch+" Read as key "+key+" which decodes to "+TreeObject.decode(key));
 					
 					
@@ -169,7 +169,7 @@ public class GeneBankCreateBTree {
 			//and we are done.
 			//file.close();
 			
-			if(verbosity>0)
+			if(verbosity>1)
 				System.out.println("Number of items loaded: "+count);
 			
 		} catch (IOException e) {
