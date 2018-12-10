@@ -16,13 +16,21 @@ OVERVIEW:
 INCLUDED FILES:
  
  ICache.java: Interface for Cache.
+
  Cache.java: Cache for BTree.
+
  DLLNode.java: Double Linked List for java
+
  Btree.java: An implementation of a BTree for GeneBanks.
+
  BtreeNode: A Node class used by the BTree.
+
  TreeObject.java: Object class used by BTree.java.
+
  GeneBankCreateBTree.java: Creates the BTree for the GeneBank with all the Gene Sequences.
+
  GeneBankSearch.java: Searches the BTree and prints the frequency of each Gene Sequence found.
+
  README: This document.
 
 
@@ -32,11 +40,11 @@ COMPILING AND RUNNING:
 
   ```$ javac *.java```
  Run:
- 
+
  GeneBankCreateBTree.java:
 
   ```$ java GeneBankCreateBTree [0 | 1(no/with Cache)] [degree] [gbk file] [sequence length] [ | cache size] [ | debug level]```
-  ```
+
    The degree is the minimum degree, t, to be used for the B-Tree. If the user specifies 0, then your program should choose the optimum degree based on a disk block size of 4096 bytes and the size of your B-Tree node on disk.
    The sequence length is an integer that must be between 1 and 31, inclusive. The query file contains all the DNA strings of a specific sequence length that we want to search for in the specified B-Tree file. The strings are one per line and they all must have the same length as the DNA sequences in the B-Tree file. The DNA strings use a, c, t, and g, either lower or upper case.
 
@@ -48,15 +56,13 @@ COMPILING AND RUNNING:
 	1
 	The program writes a text file named dump, that has the following line format: [frequency] [DNA string]. The dump file contains frequency and DNA string in an in-order traversal.
 
-   ```
-
  GeneBankSearch.java:
   ```$ java GeneBankSearch [0 | 1(no/with Cache)] [btree file] [query file] [ | cache size] [ | debug level]```
-  ```
+
   The debug level for GeneBankSearch support the following:
    0
 	The output of the queries print on the standard output stream. Any diagnostic messages, help and status messages must be be printed on standard error stream.
-  ```
+
 
 
 
